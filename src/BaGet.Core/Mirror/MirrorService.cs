@@ -218,9 +218,9 @@ namespace BaGet.Core.Mirror
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                // If the package's registration index is too big, its pages' items will be
-                // stored at different URLs. We will need to fetch each page's items individually.
-                // We can detect this case as the index's pages will have "null" items.
+                // If the package's registration index is too big, it will be split into registration
+                // pages stored at different URLs. We will need to fetch each page's items individually.
+                // We can detect this case as the registration index will have "null" items.
                 var items = page.ItemsOrNull;
 
                 if (items == null)

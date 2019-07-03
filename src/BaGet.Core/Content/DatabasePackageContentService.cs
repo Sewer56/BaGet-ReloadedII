@@ -11,6 +11,11 @@ using NuGet.Versioning;
 
 namespace BaGet.Core.Content
 {
+    /// <summary>
+    /// Implements the NuGet Package Content resource. Supports read-through caching.
+    /// Tracks state in a database (<see cref="IPackageService"/>) and stores packages
+    /// using <see cref="IPackageStorageService"/>.
+    /// </summary>
     public class DatabasePackageContentService : IBaGetPackageContentService
     {
         private readonly IMirrorService _mirror;

@@ -71,6 +71,7 @@ namespace BaGet.Core.Search
         public async Task<AutocompleteResponse> AutocompleteAsync(AutocompleteRequest request, CancellationToken cancellationToken)
         {
             // TODO: Support versions autocomplete.
+            // See: https://github.com/loic-sharma/BaGet/issues/291
             IQueryable<Package> search = _context.Packages;
 
             if (!string.IsNullOrEmpty(request.Query))

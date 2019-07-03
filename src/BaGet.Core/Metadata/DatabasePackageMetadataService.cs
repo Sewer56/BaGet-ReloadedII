@@ -92,6 +92,10 @@ namespace BaGet.Core.Metadata
             NuGetVersion upper,
             CancellationToken cancellationToken = default)
         {
+            // TODO: BaGet does not support paging of registration items.
+            // Currently, all items are inlined into the registration index.
+            // Implementing this feature efficiently requires the ability to
+            // sort packages by their versions from the database.
             throw new System.NotImplementedException();
         }
 

@@ -103,6 +103,8 @@ namespace BaGet.Azure.Search
         public async Task<AutocompleteResponse> AutocompleteAsync(AutocompleteRequest request, CancellationToken cancellationToken = default)
         {
             // TODO: Do a prefix search on the package id field.
+            // TODO: Support versions autocomplete.
+            // See: https://github.com/loic-sharma/BaGet/issues/291
             var parameters = new SearchParameters
             {
                 IncludeTotalResultCount = true,

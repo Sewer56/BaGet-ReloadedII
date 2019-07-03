@@ -50,6 +50,7 @@ namespace BaGet.Controllers
         {
             // TODO: Add other autocomplete parameters
             // TODO: Support versions autocomplete.
+            // See: https://github.com/loic-sharma/BaGet/issues/291
             return await _searchService.AutocompleteAsync(new AutocompleteRequest
             {
                 Skip = 0,
