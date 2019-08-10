@@ -11,7 +11,7 @@ namespace BaGet.Extensions
             return routes.MapRoute(
                 name: Routes.IndexRouteName,
                 template: "v3/index.json",
-                defaults: new { controller = "ServiceIndex", action = "Get" });
+                defaults: new { controller = "ServiceIndex", action = "GetAsync" });
         }
 
         public static IRouteBuilder MapPackagePublishRoutes(this IRouteBuilder routes)
