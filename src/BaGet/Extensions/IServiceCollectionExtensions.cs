@@ -66,6 +66,7 @@ namespace BaGet.Extensions
             services.AddTransient<IPackageIndexingService, PackageIndexingService>();
             services.AddTransient<IPackageDeletionService, PackageDeletionService>();
             services.AddTransient<ISymbolIndexingService, SymbolIndexingService>();
+            services.AddTransient<IBaGetServiceIndex, BaGetServiceIndex>();
             services.AddTransient<IBaGetPackageContentService, DatabasePackageContentService>();
             services.AddTransient<IBaGetPackageMetadataService, DatabasePackageMetadataService>();
             services.AddTransient<IBaGetUrlGenerator, BaGetUrlGenerator>();
