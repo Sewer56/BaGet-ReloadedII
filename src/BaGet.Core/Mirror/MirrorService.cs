@@ -230,6 +230,11 @@ namespace BaGet.Core.Mirror
                     if (externalPage == null || externalPage.ItemsOrNull == null)
                     {
                         // This should never happen...
+                        _logger.LogError(
+                            "Missing or invalid registration page for {PackageId}, versions {Lower} to {Upper}",
+                            id,
+                            page.Lower,
+                            page.Upper);
                         continue;
                     }
 
