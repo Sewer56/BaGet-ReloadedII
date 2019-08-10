@@ -96,7 +96,7 @@ namespace BaGet.Core.Metadata
             // Currently, all items are inlined into the registration index.
             // Implementing this feature efficiently requires the ability to
             // sort packages by their versions from the database.
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         private RegistrationIndexPageItem ToRegistrationIndexPageItem(Package package) =>
