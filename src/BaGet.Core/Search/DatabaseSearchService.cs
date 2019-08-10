@@ -117,7 +117,7 @@ namespace BaGet.Core.Search
             BaGetSearchRequest request,
             CancellationToken cancellationToken)
         {
-            var frameworks = GetCompatibleFrameworks(request.Framework);
+            var frameworks = GetCompatibleFrameworksOrNull(request.Framework);
             var search = (IQueryable<Package>)_context.Packages.Where(p => p.Listed);
 
             if (!string.IsNullOrEmpty(request.Query))
@@ -172,7 +172,7 @@ namespace BaGet.Core.Search
             return await search.GroupBy(p => p.Id).ToListAsync(cancellationToken);
         }
 
-        private IReadOnlyList<string> GetCompatibleFrameworks(string framework)
+        private IReadOnlyList<string> GetCompatibleFrameworksOrNull(string framework)
         {
             if (framework == null) return null;
 

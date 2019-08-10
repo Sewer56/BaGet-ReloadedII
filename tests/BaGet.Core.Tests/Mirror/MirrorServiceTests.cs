@@ -16,6 +16,7 @@ namespace BaGet.Core.Tests.Mirror
             [Fact]
             public async Task MergesLocalAndUpstream()
             {
+                await Task.Yield();
             }
         }
 
@@ -24,6 +25,7 @@ namespace BaGet.Core.Tests.Mirror
             [Fact]
             public async Task MergesLocalAndUpstream()
             {
+                await Task.Yield();
             }
         }
 
@@ -32,16 +34,19 @@ namespace BaGet.Core.Tests.Mirror
             [Fact]
             public async Task SkipsIfAlreadyMirrored()
             {
+                await Task.Yield();
             }
 
             [Fact]
             public async Task SkipsIfUpstreamDoesntHavePackage()
             {
+                await Task.Yield();
             }
 
             [Fact]
             public async Task MirrorsPackage()
             {
+                await Task.Yield();
             }
         }
 
