@@ -97,7 +97,10 @@ namespace BaGet.Azure.Search
                     versions));
             }
 
-            return new SearchResponse(response.Count.Value, results);
+            return new SearchResponse(
+                response.Count.Value,
+                results,
+                SearchContext.Default(_url.GetPackageMetadataResourceUrl()));
         }
 
         public async Task<AutocompleteResponse> AutocompleteAsync(AutocompleteRequest request, CancellationToken cancellationToken = default)

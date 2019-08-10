@@ -36,8 +36,7 @@ namespace BaGet.Core.Content
 
             if (versions == null)
             {
-                // Fallback to the local packages if the package couldn't be found
-                // on the upstream source.
+                // Fallback to the local packages if the mirroring is disabled.
                 var packages = await _packages.FindAsync(id);
 
                 if (!packages.Any())

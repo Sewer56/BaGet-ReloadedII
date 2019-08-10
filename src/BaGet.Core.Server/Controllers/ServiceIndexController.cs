@@ -1,8 +1,9 @@
-using System.Collections.Generic;
-using BaGet.Extensions;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using BaGet.Core.ServiceIndex;
 using BaGet.Protocol;
 using Microsoft.AspNetCore.Mvc;
-using NuGet.Versioning;
 
 namespace BaGet.Controllers
 {
@@ -11,30 +12,18 @@ namespace BaGet.Controllers
     /// </summary>
     public class ServiceIndexController : Controller
     {
-        private IEnumerable<ServiceIndexResource> BuildResource(string name, string url, params string[] versions) 
-        {
-            foreach (var version in versions) 
-            {
-                var type = string.IsNullOrEmpty(version) ? name : $"{name}/{version}";
+        private readonly IBaGetServiceIndex _serviceIndex;
 
-                yield return new ServiceIndexResource(type, url);
-            }
+        public ServiceIndexController(IBaGetServiceIndex serviceIndex)
+        {
+            _serviceIndex = serviceIndex ?? throw new ArgumentNullException(nameof(serviceIndex));
         }
 
         // GET v3/index
         [HttpGet]
-        public ServiceIndexResponse Get()
+        public async Task<ServiceIndexResponse> GetAsync(CancellationToken cancellationToken)
         {
-            var resources = new List<ServiceIndexResource>();
-
-            resources.AddRange(BuildResource("PackagePublish", Url.PackagePublish(), "2.0.0"));
-            resources.AddRange(BuildResource("SymbolPackagePublish", Url.SymbolPublish(), "4.9.0"));
-            resources.AddRange(BuildResource("SearchQueryService", Url.PackageSearch(), "", "3.0.0-beta", "3.0.0-rc"));
-            resources.AddRange(BuildResource("RegistrationsBaseUrl", Url.RegistrationsBase(), "", "3.0.0-rc", "3.0.0-beta"));
-            resources.AddRange(BuildResource("PackageBaseAddress", Url.PackageBase(), "3.0.0"));
-            resources.AddRange(BuildResource("SearchAutocompleteService", Url.PackageAutocomplete(), "", "3.0.0-rc", "3.0.0-beta"));
-
-            return new ServiceIndexResponse(new NuGetVersion("3.0.0"), resources);
+            return await _serviceIndex.GetAsync(cancellationToken);
         }
     }
 }

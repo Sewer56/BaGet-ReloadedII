@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using BaGet.Core.Search;
-using BaGet.Extensions;
+using BaGet.Core.ServiceIndex;
 using BaGet.Protocol;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,10 +10,12 @@ namespace BaGet.Controllers
     public class SearchController : Controller
     {
         private readonly IBaGetSearchService _searchService;
+        private readonly IBaGetUrlGenerator _url;
 
-        public SearchController(IBaGetSearchService searchService)
+        public SearchController(IBaGetSearchService searchService, IBaGetUrlGenerator url)
         {
             _searchService = searchService ?? throw new ArgumentNullException(nameof(searchService));
+            _url = url ?? throw new ArgumentNullException(nameof(url));
         }
 
         public async Task<ActionResult<SearchResponse>> SearchAsync(
@@ -28,7 +30,8 @@ namespace BaGet.Controllers
             [FromQuery]string framework = null)
         {
             var includeSemVer2 = semVerLevel == "2.0.0";
-            var results = await _searchService.SearchAsync(new BaGetSearchRequest
+
+            return await _searchService.SearchAsync(new BaGetSearchRequest
             {
                 Skip = skip,
                 Take = take,
@@ -39,11 +42,6 @@ namespace BaGet.Controllers
                 PackageType = packageType,
                 Framework = framework,
             });
-
-            return new SearchResponse(
-                totalHits: results.TotalHits,
-                data: results.Data,
-                context: SearchContext.Default(Url.RegistrationsBase()));
         }
 
         public async Task<ActionResult<AutocompleteResponse>> AutocompleteAsync([FromQuery(Name = "q")] string query = null)

@@ -70,6 +70,7 @@ namespace BaGet
 
         public string GetRegistrationPageUrl(string id, NuGetVersion lower, NuGetVersion upper)
         {
+            // BaGet does not support paging the registration resource.
             throw new NotImplementedException();
         }
 

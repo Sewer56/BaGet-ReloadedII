@@ -65,7 +65,10 @@ namespace BaGet.Core.Search
                     versionResults.ToList()));
             }
 
-            return new SearchResponse(result.Count, result);
+            return new SearchResponse(
+                result.Count,
+                result,
+                SearchContext.Default(_url.GetPackageMetadataResourceUrl()));
         }
 
         public async Task<AutocompleteResponse> AutocompleteAsync(AutocompleteRequest request, CancellationToken cancellationToken)

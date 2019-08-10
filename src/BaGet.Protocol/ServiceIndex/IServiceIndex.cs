@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 namespace BaGet.Protocol
 {
     /// <summary>
-    /// The service index resource, used to discover other resources.
+    /// The NuGet Service Index resource, used to discover other resources.
     /// See: https://docs.microsoft.com/en-us/nuget/api/service-index
     /// </summary>
     public interface IServiceIndex

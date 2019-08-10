@@ -3,6 +3,9 @@ using NuGet.Versioning;
 
 namespace BaGet.Protocol
 {
+    /// <summary>
+    /// Used to create URLs to different resources in the NuGet protocol.
+    /// </summary>
     public interface IUrlGenerator
     {
         string GetPackageContentResourceUrl();
