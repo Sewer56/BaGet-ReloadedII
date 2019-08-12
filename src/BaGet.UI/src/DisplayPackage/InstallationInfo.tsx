@@ -17,11 +17,7 @@ interface IInstallationInfoState {
 }
 
 enum Tab {
-  Dotnet,
-  DotnetTool,
-  PackageReference,
-  Paket,
-  PackageManager,
+  Dotnet
 }
 
 class InstallationInfo extends React.Component<IInstallationInfoProps, IInstallationInfoState> {
@@ -31,9 +27,7 @@ class InstallationInfo extends React.Component<IInstallationInfoProps, IInstalla
 
     // tslint:disable-next-line:no-console
     console.log(props);
-    this.state = props.isDotnetTool
-      ? this.buildState(Tab.DotnetTool)
-      : this.buildState(Tab.Dotnet);
+    this.state = this.buildState(Tab.Dotnet);
   }
 
   public render() {
@@ -42,28 +36,7 @@ class InstallationInfo extends React.Component<IInstallationInfoProps, IInstalla
         <ul className="nav">
           <InstallationInfoTab
             type={Tab.Dotnet}
-            hidden={this.props.isDotnetTool}
-            selected={this.state.selected}
-            onSelect={this.handleSelect} />
-          <InstallationInfoTab
-            type={Tab.PackageReference}
-            hidden={this.props.isDotnetTool}
-            selected={this.state.selected}
-            onSelect={this.handleSelect} />
-          <InstallationInfoTab
-            type={Tab.Paket}
-            hidden={this.props.isDotnetTool}
-            selected={this.state.selected}
-            onSelect={this.handleSelect} />
-          <InstallationInfoTab
-            type={Tab.PackageManager}
-            hidden={this.props.isDotnetTool}
-            selected={this.state.selected}
-            onSelect={this.handleSelect} />
-
-          <InstallationInfoTab
-            type={Tab.DotnetTool}
-            hidden={!this.props.isDotnetTool}
+            hidden={false}
             selected={this.state.selected}
             onSelect={this.handleSelect} />
         </ul>
@@ -92,30 +65,10 @@ class InstallationInfo extends React.Component<IInstallationInfoProps, IInstalla
     let prefix: string;
 
     switch (tab) {
-      case Tab.Dotnet:
-        content = `dotnet add package ${this.props.id} --version ${this.props.version}`;
-        prefix = ">";
-        break;
-
-      case Tab.DotnetTool:
-        content = `dotnet tool install --global ${this.props.id} --version ${this.props.version}`;
-        prefix = ">";
-        break;
-
-      case Tab.PackageReference:
-        content = `<PackageReference Include="${this.props.id}" Version="${this.props.version}" />`;
-        prefix = "";
-        break;
-
-      case Tab.Paket:
-        content = `paket add ${this.props.id} --version ${this.props.version}`;
-        prefix = ">";
-        break;
-
       default:
-      case Tab.PackageManager:
-        content = `Install-Package ${this.props.id} -Version ${this.props.version}`;
-        prefix = "PM>";
+      case Tab.Dotnet:
+        content = `"ModDependencies": [ "${this.props.id}" ]`;
+        prefix = "";
         break;
     }
 
@@ -143,11 +96,7 @@ class InstallationInfoTab extends React.Component<IInstallationInfoTabProps> {
     super(props);
 
     switch (props.type) {
-      case Tab.Dotnet: this.title = ".NET CLI"; break;
-      case Tab.DotnetTool: this.title = ".NET CLI"; break;
-      case Tab.PackageReference: this.title = "PackageReference"; break;
-      case Tab.Paket: this.title = "Paket CLI"; break;
-      case Tab.PackageManager: this.title = "Package Manager"; break;
+      case Tab.Dotnet: this.title = "ModConfig.json"; break;
     }
   }
 
