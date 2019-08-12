@@ -21,22 +21,24 @@
   display: block;
 }
 
+/* Tab */
 .installation-info li a {
   padding: 5px 10px;
   margin: 0;
-  color: #000;
-  background-color: #eaeaea;
+  color: #e3ebf1;
+  background-color: #333333;
   border: 0;
   position: relative;
   display: block;
   text-decoration: none;
 }
 
+/* Tab Item */
 .installation-info li.active a {
   font-weight: 600;
-  color: #fff;
+  color: #e3ebf1;
   text-decoration: underline;
-  background-color: #002440;
+  background-color: #793939;
 }
 
 .installation-info .content {
@@ -51,9 +53,9 @@
   padding: 0 10px 8px 10px;
   font-family: Consolas, Menlo, Monaco, "Courier New", monospace;
   line-height: 1.5;
-  color: #fff;
-  background-color: #002440;
-  border-color: #002440;
+  color: #e3ebf1;
+  background-color: #793939;
+  border-color: #793939;
   border-style: solid;
   border-width: 1px 0 1px 1px;
 }
@@ -75,10 +77,10 @@
 
 .install-script {
   margin: 10px 0 10px;
-  color: #fff;
+  color: #e3ebf1;
   font-family: Consolas, Menlo, Monaco, "Courier New", monospace;
-  background-color: #002440;
-  border-color: #002440;
+  background-color: #793939;
+  border-color: #793939;
   border-style: solid;
   border-width: 1px;
 }

@@ -1,10 +1,86 @@
+/* -- Override Bootstrap Styles -- */
+.form-control:focus {
+  border-color: #793939;
+}
+
+.btn-warning:active, .btn-warning.active, .open > .dropdown-toggle.btn-warning {
+  color: #fff;
+  background-color: #333333;
+  border-color: #333333;
+}
+
+.btn:focus, .btn:active:focus, .btn.active:focus, .btn.focus, .btn:active.focus, .btn.active.focus {
+  outline: 0px auto #793939;
+  outline-offset: 0px;
+}
+
+.btn-warning:active:hover, .btn-warning.active:hover, .open > .dropdown-toggle.btn-warning:hover, .btn-warning:active:focus, .btn-warning.active:focus, .open > .dropdown-toggle.btn-warning:focus, .btn-warning:active.focus, .btn-warning.active.focus, .open > .dropdown-toggle.btn-warning.focus {
+  color: #fff;
+  background-color: #4c4c4c;
+  border-color: #4c4c4c;
+}
+
+.btn-warning {
+  color: #fff;
+  background-color: #333333;
+  border-color: #333333;
+}
+
+.btn-warning:hover {
+  color: #fff;
+  background-color: #4c4c4c;
+  border-color: #4c4c4c;
+}
+
+.btn-warning:hover {
+  color: #fff;
+  background-color: #4c4c4c;
+  border-color: #4c4c4c;
+}
+
+.btn-warning:focus, .btn-warning.focus {
+  color: #fff;
+  background-color: #333333;
+  border-color: #333333;
+}
+
+code {
+  padding: 2px 4px;
+  font-size: 90%;
+  color: #B66363;
+  background-color: #333333;
+  border-radius: 4px;
+}
+
+/* -- Override standard HTML styles. -- */
+
+html body {
+  color: #e3ebf1;
+  background-color: #181818;
+}
+
+a {
+  color: #B66363;
+}
+
+a:hover, a:focus {
+  color: #d6a8a8;
+  text-decoration: underline;
+}
+
+.nav > li > a:hover, .nav > li > a:focus {
+  text-decoration: none;
+  background-color: #452121;
+}
+
+/* -- BaGet Standard CSS -- */
 #navbar ul {
   margin-left: -15px;
 }
 
 .navbar-inverse {
-  background-color: #004880;
-  border-color: #002b4d;
+  background-color: #793939;
+  border-color: #572929;
 }
 
 .navbar {
@@ -35,6 +111,7 @@
   color: #fff;
 }
 
+/* Underline under selected category. */
 .navbar-inverse .navbar-nav a.active span {
   padding: 5px 0;
   border-bottom: 1px solid #fff;

@@ -42,9 +42,10 @@ class App extends React.Component<RouteComponentProps, IAppState> {
           <div className="row">
             <div id="navbar" className="col-sm-12">
               <ul className="nav navbar-nav" role="tablist">
-                <li role="presentation"><NavLink to="/" exact={true} role="tab"><span>Packages</span></NavLink></li>
+				        <li role="presentation"><NavLink to="/" exact={true} role="tab"><span>Home</span></NavLink></li>
+                <li role="presentation"><NavLink to="/packages" exact={true} role="tab"><span>Packages</span></NavLink></li>
                 <li role="presentation"><NavLink to="/upload"><span>Upload</span></NavLink></li>
-                <li role="presentation"><a role="tab" href="https://loic-sharma.github.io/BaGet/" target="_blank"><span>Documentation</span></a></li>
+                <li role="presentation"><a role="tab" href="https://loic-sharma.github.io/BaGet/" target="_blank"><span>BaGet Documentation</span></a></li>
               </ul>
             </div>
           </div>
@@ -69,7 +70,7 @@ class App extends React.Component<RouteComponentProps, IAppState> {
     if (this.state.input.length === 0) {
       return (
         <section role="main" className="container main-container">
-          <Route exact={true} path="/" render={this.renderSearch} />
+          <Route exact={true} path="/packages" render={this.renderSearch} />
 
           {this.props.children}
         </section>
