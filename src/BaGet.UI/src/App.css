@@ -1,3 +1,8 @@
+/* Reloaded's own Styles */
+.bold {
+  font-weight: bold;
+}
+
 /* -- Override Bootstrap Styles -- */
 .form-control:focus {
   border-color: #793939;

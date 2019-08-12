@@ -4,6 +4,7 @@ import { Action, Location } from 'history';
 import { withRouter } from 'react-router';
 import { NavLink, Route, RouteComponentProps } from 'react-router-dom';
 
+// import Home from './Home';
 import SearchResults from './SearchResults';
 
 import './App.css';
@@ -42,7 +43,7 @@ class App extends React.Component<RouteComponentProps, IAppState> {
           <div className="row">
             <div id="navbar" className="col-sm-12">
               <ul className="nav navbar-nav" role="tablist">
-				        <li role="presentation"><NavLink to="/" exact={true} role="tab"><span>Home</span></NavLink></li>
+				        <li role="presentation"><NavLink to="/home" exact={true} role="tab"><span>Home</span></NavLink></li>
                 <li role="presentation"><NavLink to="/packages" exact={true} role="tab"><span>Packages</span></NavLink></li>
                 <li role="presentation"><NavLink to="/upload"><span>Upload</span></NavLink></li>
               </ul>
@@ -66,6 +67,8 @@ class App extends React.Component<RouteComponentProps, IAppState> {
   }
 
   private _renderContent() {
+
+    /* If no input, show packages screen? */
     if (this.state.input.length === 0) {
       return (
         <section role="main" className="container main-container">
@@ -75,19 +78,24 @@ class App extends React.Component<RouteComponentProps, IAppState> {
         </section>
       );
     }
-    else
-    {
-      return (
-        <section role="main" className="container main-container">
-          <SearchResults input={this.state.input} />
-        </section>
-      );
-    }
+
+    /* Show search results if any input. */
+    return (
+      <section role="main" className="container main-container">
+        <SearchResults input={this.state.input} />
+      </section>
+    );
   }
 
   private renderSearch = (props: RouteComponentProps<any>) => (
     <SearchResults input={this.state.input} {...props} />
   );
+
+  /*
+  private renderHome = (props: RouteComponentProps<any>) => (
+    <Home />
+  );
+  */
 
   private handleChange = (input: React.ChangeEvent<HTMLInputElement>) =>
     this.setState({ input: input.target.value });

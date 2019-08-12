@@ -7,6 +7,7 @@ import * as ReactDOM from 'react-dom';
 import App from './App';
 
 import DisplayPackage from './DisplayPackage/DisplayPackage';
+import Home from './Home';
 import Upload from './Upload';
 
 import './index.css';
@@ -21,6 +22,7 @@ ReactDOM.render(
       <Route path="/packages/:id/:version?" component={DisplayPackage} />
 
       <Route path="/upload" component={Upload} />
+      <Route path="/home" component={Home} />
     </App>
   </Router>,
   document.getElementById('root') as HTMLElement
