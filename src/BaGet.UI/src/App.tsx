@@ -91,12 +91,6 @@ class App extends React.Component<RouteComponentProps, IAppState> {
     <SearchResults input={this.state.input} {...props} />
   );
 
-  /*
-  private renderHome = (props: RouteComponentProps<any>) => (
-    <Home />
-  );
-  */
-
   private handleChange = (input: React.ChangeEvent<HTMLInputElement>) =>
     this.setState({ input: input.target.value });
 }

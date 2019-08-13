@@ -21,6 +21,11 @@ namespace BaGet.Core.Indexing
         PackageAlreadyExists,
 
         /// <summary>
+        /// The wrong API key was used to try update the package.
+        /// </summary>
+        BadApiKey,
+
+        /// <summary>
         /// The package has been indexed successfully.
         /// </summary>
         Success,
@@ -36,7 +41,8 @@ namespace BaGet.Core.Indexing
         /// </summary>
         /// <param name="stream">The stream containing the package's content.</param>
         /// <param name="cancellationToken"></param>
+        /// <param name="apiKey">The API key associated with initial upload of the package.</param>
         /// <returns>The result of the attempted indexing operation.</returns>
-        Task<PackageIndexingResult> IndexAsync(Stream stream, CancellationToken cancellationToken);
+        Task<PackageIndexingResult> IndexAsync(Stream stream, CancellationToken cancellationToken, string apiKey = null);
     }
 }

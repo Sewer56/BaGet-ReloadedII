@@ -12,6 +12,7 @@ namespace BaGet.Core.Entities
         public string Id { get; set; }
         public NuGetVersion Version { get; set; }
 
+        public string ApiKey { get; set; } // API Key associated with Reloaded-II implementation.
         public string[] Authors { get; set; }
         public string Description { get; set; }
         public long Downloads { get; set; }

@@ -15,6 +15,7 @@ namespace BaGet.Database.Sqlite.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     Id = table.Column<string>(type: "TEXT COLLATE NOCASE", maxLength: 128, nullable: false),
                     Authors = table.Column<string>(maxLength: 4000, nullable: true),
+                    ApiKey = table.Column<string>(maxLength: 256),
                     Description = table.Column<string>(maxLength: 4000, nullable: true),
                     Downloads = table.Column<long>(nullable: false),
                     HasReadme = table.Column<bool>(nullable: false),

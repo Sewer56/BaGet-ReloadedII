@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -19,6 +19,7 @@ namespace BaGet.Database.PostgreSql.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
                     Id = table.Column<string>(type: "citext", maxLength: 128, nullable: false),
                     Authors = table.Column<string>(maxLength: 4000, nullable: true),
+                    ApiKey = table.Column<string>(maxLength: 256),
                     Description = table.Column<string>(maxLength: 4000, nullable: true),
                     Downloads = table.Column<long>(nullable: false),
                     HasReadme = table.Column<bool>(nullable: false),

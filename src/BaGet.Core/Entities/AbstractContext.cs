@@ -8,6 +8,7 @@ namespace BaGet.Core.Entities
     {
         public const int DefaultMaxStringLength = 4000;
 
+        public const int MaxApiKeyLength = 128;
         public const int MaxPackageIdLength = 128;
         public const int MaxPackageVersionLength = 64;
         public const int MaxPackageMinClientVersionLength = 44;
@@ -57,6 +58,10 @@ namespace BaGet.Core.Entities
             package.Property(p => p.VersionString)
                 .HasColumnName("Version")
                 .HasMaxLength(MaxPackageVersionLength)
+                .IsRequired();
+
+            package.Property(p => p.ApiKey)
+                .HasMaxLength(MaxApiKeyLength)
                 .IsRequired();
 
             package.Property(p => p.Authors)

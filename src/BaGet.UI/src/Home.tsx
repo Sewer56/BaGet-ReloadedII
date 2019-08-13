@@ -23,9 +23,9 @@ class Home extends React.Component<{}, {}> {
                 <h1>Don't be an asshole</h1>
                 <text>
                     This repository is open to everyone, registration free.<br/>
-                    Anyone can freely upload and unlist packages. (Security: Nonexistent).<br/><br/>
+                    Anyone can freely upload and unlist packages.<br/><br/>
 
-                    Use common sense. Don't unlist each other people's packages, don't upload random things that aren't mods and try not to tick off certain authors by uploading without their permission.<br/><br/>
+                    Use common sense. Don't upload random things that aren't mods and try not to tick off certain authors by uploading without their permission.<br/><br/>
 
                     I'm a student with no active source of income paying out of my own wallet to host this service. 
                     <span className="bold"> If people are unable to behave, I will be forced to restrict uploading to certain users or shut the service down.</span> I have a lot of faith in humanity to be hosting this.

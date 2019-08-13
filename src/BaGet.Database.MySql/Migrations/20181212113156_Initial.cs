@@ -15,6 +15,7 @@ namespace BaGet.Database.MySql.Migrations
                     Key = table.Column<int>(nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     Id = table.Column<string>(maxLength: 128, nullable: false),
+                    ApiKey = table.Column<string>(maxLength: 256),
                     Authors = table.Column<string>(maxLength: 4000, nullable: true),
                     Description = table.Column<string>(maxLength: 4000, nullable: true),
                     Downloads = table.Column<long>(nullable: false),

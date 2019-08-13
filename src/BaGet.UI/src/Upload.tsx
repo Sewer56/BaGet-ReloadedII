@@ -39,7 +39,27 @@ class Upload extends React.Component<{}, IUploadState> {
   public render() {
     return (
       <div className="col-sm-12">
-        <h1>Upload</h1>
+        <h1>Rules of Uploading</h1>
+
+        <text>
+          This NuGet service associates individual packages with a user supplied "API" key which must be specified.
+          An API key can be any string/piece of text of arbitrary length between 1 and 128 characters (your pick!). <br/><br/>
+
+          Once a package is uploaded, it is forever associated with that key. In order to update the package and/or delete the package from the service, you will need to use the same key that originally uploaded the package. Using a different key will return 401 (Unauthorized).
+        </text>
+
+        <h1>Recommendations</h1>
+        <ul>
+            <li>Please save your keys somewhere in an accessible location.</li>
+            <li>I do not plan to allow key resets for a given package without proof of ownership and any good reason.</li>
+        </ul>
+
+        <text className="bold">
+          Please do not use your password as the API key.<br/>
+          The API keys are stored insecurely in the database, as plain text.
+        </text>
+
+        <h1>How to Upload</h1>
         <hr className="breadcrumb-divider" />
 
         <div>You can push packages using the service index <code>{this.serviceIndexUrl}</code>.</div>
@@ -87,19 +107,19 @@ class Upload extends React.Component<{}, IUploadState> {
     switch (tab) {
       case Tab.DotNet:
         name = ".NET CLI";
-        content = [`dotnet nuget push -s ${this.serviceIndexUrl} package.nupkg`];
+        content = [`dotnet nuget push -s ${this.serviceIndexUrl} -k YOUR-UNIQUE-KEY package.nupkg`];
         documentationUrl = "https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-nuget-push";
         break;
 
       case Tab.NuGet:
         name = "NuGet";
-        content = [`nuget -Source ${this.serviceIndexUrl} package.nupkg`];
+        content = [`nuget -Source ${this.serviceIndexUrl} -ApiKey YOUR-UNIQUE-KEY package.nupkg`];
         documentationUrl = "https://docs.microsoft.com/en-us/nuget/tools/cli-ref-push";
         break;
 
       case Tab.Paket:
         name = "Paket";
-        content = [`paket push --url ${this.baseUrl} package.nupkg`];
+        content = [`paket push --url ${this.baseUrl} --api-key YOUR-UNIQUE-KEY package.nupkg`];
         documentationUrl = "https://fsprojects.github.io/Paket/paket-push.html";
         break;
 
@@ -107,7 +127,7 @@ class Upload extends React.Component<{}, IUploadState> {
       case Tab.PowerShellGet:
         name = "PowerShellGet";
         content = [
-          `Register-PSRepository -Name "BaGet" -SourceLocation "${this.serviceIndexUrl}" -PublishLocation "${this.publishUrl}" -InstallationPolicy "Trusted"`,
+          `Register-PSRepository -Name "BaGet" -SourceLocation "${this.serviceIndexUrl}" -PublishLocation "${this.publishUrl}" -NuGetApiKey YOUR-UNIQUE-KEY -InstallationPolicy "Trusted"`,
           `Publish-Module -Name PS-Module -Repository BaGet`
         ];
         documentationUrl = "https://docs.microsoft.com/en-us/powershell/module/powershellget/publish-module";

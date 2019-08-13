@@ -17,6 +17,7 @@ namespace BaGet.Database.SqlServer.Migrations
                     Id = table.Column<string>(maxLength: 128, nullable: false),
                     Authors = table.Column<string>(maxLength: 4000, nullable: true),
                     Description = table.Column<string>(maxLength: 4000, nullable: true),
+                    ApiKey = table.Column<string>(maxLength: 256),
                     Downloads = table.Column<long>(nullable: false),
                     HasReadme = table.Column<bool>(nullable: false),
                     Language = table.Column<string>(maxLength: 20, nullable: true),

@@ -233,7 +233,7 @@ namespace BaGet.Core.Mirror
                         id,
                         version);
 
-                    var result = await _indexer.IndexAsync(stream, cancellationToken);
+                    var result = await _indexer.IndexAsync(stream, cancellationToken, "");
 
                     _logger.LogInformation(
                         "Finished indexing package {PackageId} {PackageVersion} with result {Result}",

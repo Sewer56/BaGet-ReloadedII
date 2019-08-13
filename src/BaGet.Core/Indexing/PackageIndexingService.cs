@@ -40,7 +40,7 @@ namespace BaGet.Core.Indexing
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task<PackageIndexingResult> IndexAsync(Stream packageStream, CancellationToken cancellationToken)
+        public async Task<PackageIndexingResult> IndexAsync(Stream packageStream, CancellationToken cancellationToken, string apiKey = null)
         {
             // Try to extract all the necessary information from the package.
             Package package;
@@ -52,6 +52,7 @@ namespace BaGet.Core.Indexing
                 using (var packageReader = new PackageArchiveReader(packageStream, leaveStreamOpen: true))
                 {
                     package = GetPackageMetadata(packageReader);
+                    package.ApiKey = apiKey;
                     nuspecStream = await packageReader.GetNuspecAsync(cancellationToken);
                     nuspecStream = await nuspecStream.AsTemporaryFileStreamAsync();
 
@@ -71,6 +72,17 @@ namespace BaGet.Core.Indexing
                 _logger.LogError(e, "Uploaded package is invalid");
 
                 return PackageIndexingResult.InvalidPackage;
+            }
+
+            // Check API key was supplied.
+            if (apiKey == null)
+                return PackageIndexingResult.BadApiKey;
+
+            var existingPackages = await _packages.FindAsync(package.Id);
+            if (existingPackages.Count > 0)
+            {
+                if (existingPackages.First().ApiKey != apiKey)
+                    return PackageIndexingResult.BadApiKey;
             }
 
             // The package is well-formed. Ensure this is a new package.
