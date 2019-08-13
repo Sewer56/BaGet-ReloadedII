@@ -9,6 +9,12 @@ interface IUploadState {
   content: string[];
   documentationUrl: string;
   name: string;
+  storageSpace: IStorageSpace
+}
+
+interface IStorageSpace {
+  bytesConsumed: number;
+  totalBytes: number;
 }
 
 enum Tab {
@@ -24,7 +30,6 @@ class Upload extends React.Component<{}, IUploadState> {
   private serviceIndexUrl: string;
   private publishUrl: string;
 
-
   constructor(props: {}) {
     super(props);
 
@@ -36,9 +41,37 @@ class Upload extends React.Component<{}, IUploadState> {
     this.state = this.buildState(Tab.DotNet);
   }
 
+  public componentDidMount() {
+    const storageUrl = `/custom/storage/storage.json`;
+
+    fetch(storageUrl, {}).then(response => {
+      return response.json();
+    }).then(json => {
+      const storageInfo = json as IStorageSpace;
+      this.setState({ storageSpace: storageInfo });
+    }).catch(
+      (e) => {
+        // tslint:disable-next-line:no-console
+        console.log("Failed to get storage info.", e)}
+    );
+  }
+
   public render() {
+    const percentageStorageConsumed = (this.state.storageSpace.bytesConsumed / this.state.storageSpace.totalBytes) * 100;
+    const percentageStorageConsumedString = percentageStorageConsumed + "%";
+
     return (
       <div className="col-sm-12">
+        <h1>Storage Usage</h1>
+        
+        <div className="progress">
+          <div className="progress-bar progress-bar-danger" 
+               role="progressbar"
+               style={{width: percentageStorageConsumedString}}>
+            {this.toGigabytes(this.state.storageSpace.bytesConsumed)}GB / {this.toGigabytes(this.state.storageSpace.totalBytes)}GB
+          </div>
+        </div>
+
         <h1>Rules of Uploading</h1>
 
         <text>
@@ -96,6 +129,10 @@ class Upload extends React.Component<{}, IUploadState> {
     );
   }
 
+  private toGigabytes = (bytes: number) => {
+    return (bytes / 1000 / 1000 / 1000).toFixed(2);
+  }
+
   private handleSelect = (selected: Tab) =>
     this.setState(this.buildState(selected));
 
@@ -139,6 +176,7 @@ class Upload extends React.Component<{}, IUploadState> {
       documentationUrl,
       name,
       selected: tab,
+      storageSpace: { bytesConsumed: 0, totalBytes: 0 }
     };
   }
 }

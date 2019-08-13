@@ -118,5 +118,15 @@ namespace BaGet.Extensions
 
             return routes;
         }
+
+        public static IRouteBuilder MapCustomRoutes(this IRouteBuilder routes)
+        {
+            routes.MapRoute(
+                name: Routes.PackageVersionsRouteName,
+                template: "custom/storage/storage.json",
+                defaults: new { controller = "Storage", action = "Get" });
+
+            return routes;
+        }
     }
 }

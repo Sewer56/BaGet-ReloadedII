@@ -4,6 +4,10 @@
 }
 
 /* -- Override Bootstrap Styles -- */
+.progress {
+  background-color: #333333;
+}
+
 .form-control:focus {
   border-color: #793939;
 }
