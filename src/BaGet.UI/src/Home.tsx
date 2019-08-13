@@ -7,10 +7,7 @@ class Home extends React.Component<{}, {}> {
                 <h1>Reloaded II Community NuGet Repository</h1>
                 <text>
                     This is a public NuGet repository for hosting Reloaded-II mods as packages.<br/>
-                    Hosted using BaGet, with love, it is used both within the `Download Mods` menu, as seen in the mod launcher and for resolving mod dependencies.<br/><br/>
-
-                    At the current moment in time, the mod loader will only ever install the newest versions of each mod, both as dependency and individually.<br/>
-                    The plan is to keep it this way, unless a specific scenario requires it to be any other way.
+                    Hosted using BaGet 🥖, it's used by the `Download Mods` menu and for resolving mod dependencies.
                 </text>
 
                 <h1>Resources</h1>
@@ -33,19 +30,18 @@ class Home extends React.Component<{}, {}> {
 
                 <h1>I am not a web developer</h1>
                 <text>
-                    This repository is more of a hackjob, in that I have learned the bare minimum of ASP.NET and React from scratch to be able to make basic changes to the site.<br/>
-                    This is pretty much a pre-baked solution with some minor modifications here and there.<br/><br/>
+                    This repository is more of a hackjob, in that I have learned the bare minimum of ASP.NET and React from scratch to be able to make basic changes to the site.<br/><br/>
+                    Themed some stuff, implemented an authentication system and a storage reporting feature. Aside from that, this is pretty much a pre-baked solution.<br/><br/>
 
                     Lack of registration and personal API keys is due to the inability to compile the official NuGet gallery.
                     I believe it is simply broken with VS2019 at the current moment in time though I have not installed 2017 to confirm.<br/><br/>
 
-                    <span className="bold">"We" (I) am looking for a contributor willing to make/host something better.</span>
+                    <span className="bold">"We" (I) am looking for a contributor willing to help with this repository.</span>
                 </text>
 
                 <h1>TODO:</h1>
                 <ul>
-                    <li>Retention Policy: Remove packages at random that aren't latest version when approaching maximum storage capacity.</li>
-                    
+                    <li>Retention Policy: Remove packages at random that aren't latest version when approaching maximum storage capacity. Reloaded will only download latest version anyway.</li>
                 </ul>
             </div>
         );
