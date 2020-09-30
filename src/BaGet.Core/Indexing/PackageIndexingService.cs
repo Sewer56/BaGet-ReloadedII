@@ -74,17 +74,6 @@ namespace BaGet.Core.Indexing
                 return PackageIndexingResult.InvalidPackage;
             }
 
-            // Check API key was supplied.
-            if (apiKey == null)
-                return PackageIndexingResult.BadApiKey;
-
-            var existingPackages = await _packages.FindAsync(package.Id);
-            if (existingPackages.Count > 0)
-            {
-                if (existingPackages.First().ApiKey != apiKey)
-                    return PackageIndexingResult.BadApiKey;
-            }
-
             // The package is well-formed. Ensure this is a new package.
             if (await _packages.ExistsAsync(package.Id, package.Version))
             {

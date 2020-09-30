@@ -41,7 +41,7 @@ namespace BaGet.Controllers
         // See: https://docs.microsoft.com/en-us/nuget/api/package-publish-resource#push-a-package
         public async Task Upload(CancellationToken cancellationToken)
         {
-            if (_options.Value.IsReadOnlyMode || String.IsNullOrEmpty(Request.GetApiKey()))
+            if (_options.Value.IsReadOnlyMode || !_authentication.Authenticate(Request.GetApiKey(), null))
             {
                 HttpContext.Response.StatusCode = 401;
                 return;
@@ -100,17 +100,12 @@ namespace BaGet.Controllers
                 return NotFound();
             }
 
-            if (String.IsNullOrEmpty(Request.GetApiKey()))
-            {
-                return Unauthorized();
-            }
 
             // Check API Key
-            var firstPackage = await _packages.FindOrNullAsync(id, NuGetVersion.Parse(version));
-            if (firstPackage != null)
+            var apiKey = (await _packages.FindOrNullAsync(id, NuGetVersion.Parse(version)))?.ApiKey;
+            if (!await _authentication.AuthenticateAsync(Request.GetApiKey(), apiKey))
             {
-                if (firstPackage.ApiKey != Request.GetApiKey())
-                    return Unauthorized();
+                return Unauthorized();
             }
 
             if (await _deleteService.TryDeletePackageAsync(id, nugetVersion, cancellationToken))
@@ -136,17 +131,11 @@ namespace BaGet.Controllers
                 return NotFound();
             }
 
-            if (String.IsNullOrEmpty(Request.GetApiKey()))
+            // Check API Key
+            var apiKey = (await _packages.FindOrNullAsync(id, NuGetVersion.Parse(version)))?.ApiKey;
+            if (!await _authentication.AuthenticateAsync(Request.GetApiKey(), apiKey))
             {
                 return Unauthorized();
-            }
-
-            // Check API Key
-            var firstPackage = await _packages.FindOrNullAsync(id, NuGetVersion.Parse(version));
-            if (firstPackage != null)
-            {
-                if (firstPackage.ApiKey != Request.GetApiKey())
-                    return Unauthorized();
             }
 
             if (await _packages.RelistPackageAsync(id, nugetVersion))
