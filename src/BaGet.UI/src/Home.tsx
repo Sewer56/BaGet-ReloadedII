@@ -1,49 +1,44 @@
 import * as React from 'react';
+import mainScreen from './assets/mainScreen.png';
 
 class Home extends React.Component<{}, {}> {
     public render() { 
         return ( 
-            <div>
+            <p>
                 <h1>Reloaded II Community NuGet Repository</h1>
                 <text>
-                    This is a public NuGet repository for hosting Reloaded-II mods as packages.<br/>
-                    Hosted using BaGet 🥖, it's used by the `Download Mods` menu and for resolving mod dependencies.
+                    This is a public NuGet repository for hosting Reloaded-II code mods as packages.<br/>
+                    Hosted using BaGet 🥖, it's the default repository available in the `Download Mods` menu used for resolving mod dependencies.
                 </text>
+
+                <div>
+                    <br/>
+                    <img src={mainScreen} />
+                </div>
 
                 <h1>Resources</h1>
                 <text>
-                    At the current moment in time, the repository can sustain about <span className="bold">18GB</span> of packages.
-                    There is no set upload limit, however please try to keep your packages to a maximum of 100MB.
-                    Realistically this should be enough to last a year or two, depending on Reloaded's rate of adoption.
+                    At the current moment in time, the repository can sustain about <span className="bold">18GB</span> of packages.<br/>
+                    There is no set upload limit, however please try to keep your packages to a maximum of 50MB.
                 </text>
 
-                <h1>Don't be an asshole</h1>
+                <h1>Please be nice!</h1>
                 <text>
                     This repository is open to everyone, registration free.<br/>
-                    Anyone can freely upload and unlist packages.<br/><br/>
+                    Anyone can freely download, upload and delete (their own) packages.<br/><br/>
 
-                    Use common sense. Don't upload random things that aren't mods and try not to tick off certain authors by uploading without their permission.<br/><br/>
-
-                    I'm a student with no active source of income paying out of my own wallet to host this service. 
-                    <span className="bold"> If people are unable to behave, I will be forced to restrict uploading to certain users or shut the service down.</span> I have a lot of faith in humanity to be hosting this.
+                    Use common sense. Please don't upload non-mod content or packages without the original authors' permission.<br/><br/>
+                    
+                    <span className="bold"> If people are unable to behave, I will be forced to make this service read-only.</span><br/>
+                    I have a lot of faith in humanity to be hosting this.
                 </text>
 
                 <h1>I am not a web developer</h1>
                 <text>
-                    This repository is more of a hackjob, in that I have learned the bare minimum of ASP.NET and React from scratch to be able to make basic changes to the site.<br/><br/>
+                    This repository is more of a hackjob, in that I have learned the bare minimum of ASP.NET and React from scratch to be able to make basic changes to the site.<br/>
                     Themed some stuff, implemented an authentication system and a storage reporting feature. Aside from that, this is pretty much a pre-baked solution.<br/><br/>
-
-                    Lack of registration and personal API keys is due to the inability to compile the official NuGet gallery.
-                    I believe it is simply broken with VS2019 at the current moment in time though I have not installed 2017 to confirm.<br/><br/>
-
-                    <span className="bold">"We" (I) am looking for a contributor willing to help with this repository.</span>
                 </text>
-
-                <h1>TODO:</h1>
-                <ul>
-                    <li>Retention Policy: Remove packages at random that aren't latest version when approaching maximum storage capacity. Reloaded will only download latest version anyway.</li>
-                </ul>
-            </div>
+            </p>
         );
     }
 }

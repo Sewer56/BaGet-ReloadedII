@@ -84,7 +84,7 @@ class Upload extends React.Component<{}, IUploadState> {
         <h1>Recommendations</h1>
         <ul>
             <li>Please save your keys somewhere in an accessible location.</li>
-            <li>I do not plan to allow key resets for a given package without proof of ownership and any good reason.</li>
+            <li>Please don't lose your key; currently no mechanism exists to reset keys.</li>
         </ul>
 
         <text className="bold">
@@ -109,7 +109,7 @@ class Upload extends React.Component<{}, IUploadState> {
             <div className="script">
               {this.state.content.map(value => (
                 <div key={value}>
-                  > {value}
+                    {value}
                 </div>
               ))}
             </div>
