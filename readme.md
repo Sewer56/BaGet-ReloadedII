@@ -57,6 +57,9 @@ snap alias dotnet-sdk.dotnet dotnet
 ```sh
 #!/bin/sh
 
+# Can be set in config too; see https://docs.microsoft.com/en-us/aspnet/core/fundamentals/servers/kestrel?view=aspnetcore-3.1#endpoint-configuration
+export ASPNETCORE_URLS=http://*:5000
+
 DATE=`date '+%Y-%m-%d %H:%M:%S'`
 echo "BaGet Service Started at ${DATE}" | systemd-cat -p info
 
