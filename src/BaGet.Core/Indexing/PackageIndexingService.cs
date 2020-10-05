@@ -40,6 +40,33 @@ namespace BaGet.Core.Indexing
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
+        /// <summary>
+        /// Retrieves the metadata of a given package without advancing the stream.
+        /// </summary>
+        public Package GetPackageMetadata(Stream packageStream)
+        {
+            // Try to extract all the necessary information from the package.
+            Package package = null;
+            var position    = packageStream.Position;
+
+            try
+            {
+                using (var packageReader = new PackageArchiveReader(packageStream, leaveStreamOpen: true))
+                {
+                    package = GetPackageMetadata(packageReader);
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "GetPackageMetadata: Uploaded package is invalid");
+                packageStream.Position = position;
+                return package;
+            }
+
+            packageStream.Position = position;
+            return package;
+        }
+
         public async Task<PackageIndexingResult> IndexAsync(Stream packageStream, CancellationToken cancellationToken, string apiKey = null)
         {
             // Try to extract all the necessary information from the package.
@@ -69,8 +96,7 @@ namespace BaGet.Core.Indexing
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Uploaded package is invalid");
-
+                _logger.LogError(e, "IndexAsync: Uploaded package is invalid");
                 return PackageIndexingResult.InvalidPackage;
             }
 

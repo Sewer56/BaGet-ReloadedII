@@ -1,6 +1,7 @@
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using BaGet.Core.Entities;
 
 namespace BaGet.Core.Indexing
 {
@@ -21,11 +22,6 @@ namespace BaGet.Core.Indexing
         PackageAlreadyExists,
 
         /// <summary>
-        /// The wrong API key was used to try update the package.
-        /// </summary>
-        BadApiKey,
-
-        /// <summary>
         /// The package has been indexed successfully.
         /// </summary>
         Success,
@@ -36,6 +32,14 @@ namespace BaGet.Core.Indexing
     /// </summary>
     public interface IPackageIndexingService
     {
+        /// <summary>
+        /// Retrieves the metadata of a given package without advancing the stream.
+        /// Can be used to perform additional verification before passing the package on to the indexer.
+        /// </summary>
+        /// <param name="packageStream">The stream.</param>
+        /// <returns>Package metadata, else null if the operation failed.</returns>
+        Package GetPackageMetadata(Stream packageStream);
+
         /// <summary>
         /// Attempt to index a new package.
         /// </summary>
