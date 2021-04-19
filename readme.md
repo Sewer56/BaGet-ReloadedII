@@ -1,4 +1,4 @@
-*# Reloaded II Repository :baguette_bread:
+# Reloaded II Repository :baguette_bread:
 
 A lightweight [NuGet](https://docs.microsoft.com/en-us/nuget/what-is-nuget) server used for Hosting Reloaded II mods based on [BaGet](https://github.com/loic-sharma/BaGet).
 
