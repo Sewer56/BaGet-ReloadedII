@@ -1,3 +1,4 @@
+using System.Data;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -63,6 +64,7 @@ public class SqliteContext : AbstractContext<SqliteContext>
         }
 
         await base.RunMigrationsAsync(cancellationToken);
+        await ApplyRuntimePragmasAsync(cancellationToken);
     }
 
     /// <summary>
@@ -76,6 +78,33 @@ public class SqliteContext : AbstractContext<SqliteContext>
         if (string.IsNullOrWhiteSpace(pathToCreate)) return;
 
         Directory.CreateDirectory(pathToCreate);
+    }
+
+    private async Task ApplyRuntimePragmasAsync(CancellationToken cancellationToken)
+    {
+        if (Database.GetDbConnection() is not SqliteConnection connection)
+        {
+            return;
+        }
+
+        var shouldCloseConnection = connection.State == ConnectionState.Closed;
+        if (shouldCloseConnection)
+        {
+            await connection.OpenAsync(cancellationToken);
+        }
+
+        try
+        {
+            await Database.ExecuteSqlRawAsync("PRAGMA synchronous = '1';", cancellationToken);
+            await Database.ExecuteSqlRawAsync("PRAGMA journal_mode = 'WAL';", cancellationToken);
+        }
+        finally
+        {
+            if (shouldCloseConnection)
+            {
+                await connection.CloseAsync();
+            }
+        }
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

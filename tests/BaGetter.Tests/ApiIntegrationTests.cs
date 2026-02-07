@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.IO.Compression;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -50,6 +51,26 @@ public class ApiIntegrationTests : IDisposable
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Equal(TestData.ServiceIndex, content);
+    }
+
+    [Fact]
+    public async Task IndexUsesGzipCompressionWhenRequested()
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, "v3/index.json");
+        request.Headers.TryAddWithoutValidation("Accept-Encoding", "gzip");
+
+        using var response = await _client.SendAsync(request);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("gzip", response.Content.Headers.ContentEncoding, StringComparer.OrdinalIgnoreCase);
+
+        var compressed = await response.Content.ReadAsByteArrayAsync();
+        using var compressedStream = new MemoryStream(compressed);
+        using var gzip = new GZipStream(compressedStream, CompressionMode.Decompress);
+        using var reader = new StreamReader(gzip);
+
+        var json = await reader.ReadToEndAsync();
+        Assert.Equal(TestData.ServiceIndex, json);
     }
 
     [Fact]

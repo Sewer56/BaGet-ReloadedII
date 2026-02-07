@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -49,6 +50,11 @@ public class Startup
         services.AddHealthChecks();
 
         services.AddCors();
+
+        services.AddResponseCompression(options =>
+        {
+            options.EnableForHttps = true;
+        });
     }
 
     private void ConfigureBaGetterApplication(BaGetterApplication app)
@@ -89,6 +95,8 @@ public class Startup
 
         app.UseForwardedHeaders();
         app.UsePathBase(options.PathBase);
+
+        app.UseResponseCompression();
 
         app.UseStaticFiles();
         app.UseAuthentication();
