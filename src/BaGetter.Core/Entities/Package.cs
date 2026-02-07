@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using NuGet.Versioning;
 
@@ -12,6 +13,14 @@ public class Package
     public int Key { get; set; }
 
     public string Id { get; set; }
+
+    /// <summary>
+    /// The package ownership key. This is the API key used when the package was first uploaded,
+    /// stored to verify ownership for delete/relist operations. This is not a secret credential
+    /// but rather a package identifier for authorization checks.
+    /// </summary>
+    [MaxLength(128)]
+    public string ApiKey { get; set; }
 
     public NuGetVersion Version
     {
