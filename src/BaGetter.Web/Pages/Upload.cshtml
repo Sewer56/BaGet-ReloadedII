@@ -1,17 +1,52 @@
-﻿@page
+@page
+@using BaGetter.Web.Reloaded.Models
 @inject IUrlGenerator _url
 
 @{
     ViewData["Title"] = "Upload package";
 
     var baseUrl = Url.PageLink("/Index");
-    var publishUrl = _url.GetPackagePublishResourceUrl();
     var serviceIndexUrl = _url.GetServiceIndexUrl();
+
+    var storage = new LocalStorageSpace();
+    var uploadProgressString  = $"{storage.BytesConsumedGB} / {storage.TotalBytesGB} GB";
+    var uploadProgressPercent = (storage.BytesConsumed / (double)storage.TotalBytes) * 100;
 }
 
 <div class="col-sm-12">
+    <h1>Storage Usage</h1>
+
+    <div class="progress">
+        <div class="progress-bar progress-bar-danger"
+             role="progressbar"
+             style="width: @uploadProgressPercent%">
+            @uploadProgressString
+        </div>
+    </div>
+
+    <h1>Rules of Uploading</h1>
+
+    <text>
+        This NuGet service associates individual packages with a user supplied "API" key which must be specified.
+        An API key can be any string/piece of text of arbitrary length between 1 and 128 characters (your pick!). <br/><br/>
+
+        Once a package is uploaded, it is forever associated with that key. In order to update the package and/or delete the package from the service, you will need to use the same key that originally uploaded the package. Using a different key will return 401 (Unauthorized).
+    </text>
+
+    <h1>Recommendations</h1>
+    <ul>
+        <li>Please save your keys somewhere in an accessible location.</li>
+        <li>Please don't lose your key; currently no mechanism exists to reset keys.</li>
+    </ul>
+
+    <text class="reloaded-bold">
+        Please do not use your password as the API key.<br/>
+        The API keys are stored insecurely in the database, as plain text.<br/>
+    </text>
+    <span class="reloaded-italic">It is suggested you use a password manager with a random password.</span>
+
     <h1>Upload</h1>
-    <hr class="breadcrumb-divider" />
+    <hr class="breadcrumb-divider"/>
 
     <div>You can push packages using the service index <code>@serviceIndexUrl</code>.</div>
 
@@ -72,17 +107,6 @@
             name: "Paket",
             content: ["paket push --url @baseUrl package.nupkg"],
             documentation: "https://fsprojects.github.io/Paket/paket-push.html",
-        },
-
-        // TODO: This is broken...
-        {
-            name: "PowerShellGet",
-            content: [
-                "Register-PSRepository -Name \"BaGet\" -SourceLocation \"@serviceIndexUrl\" "
-                  + "-PublishLocation \"@publishUrl\" -InstallationPolicy \"Trusted\"",
-                "Publish-Module -Name PS-Module -Repository BaGet"
-            ],
-            documentation: "https://docs.microsoft.com/en-us/powershell/module/powershellget/publish-module",
         },
     ];
 </script>

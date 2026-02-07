@@ -1,0 +1,45 @@
+@page
+@model AboutModel
+@{
+    ViewData["Title"] = "Home";
+}
+
+<p>
+    <h1>Reloaded II Community NuGet Repository</h1>
+    <text>
+        This is a public NuGet repository for uploading small Reloaded-II code mods as packages.<br/>
+        Powered using a custom version of BaGet 🥖.
+    </text>
+
+    <h1>Resources</h1>
+    <text>
+        This server is hosted by a single cheap VPS in 🇩🇪 (Germany).<br/>
+        There is no special Content Delivery Network (CDN) of any kind and storage is limited.<br/>
+        There is no set upload limit, however please try to keep your packages to a maximum of 50MB.
+    </text>
+
+    <h1>Intended Use Cases</h1>
+    <text>
+        Resolving dependencies, i.e. downloading mods required by other mods.<br/>
+        Especially with older mods where metadata to resolve dependencies isn't part of 'ModConfig.json'.<br/><br/>
+
+        Using this service is not recommended for non-code mods, upload regular mods to <a href="https://gamebanana.com">GameBanana</a> or <a href="https://www.nexusmods.com">NexusMods</a>.<br/>
+        (Hint: NuGet doesn't support image previews or captions, for example.)
+    </text>
+
+    <h1>Please be nice!</h1>
+    <text>
+        This repository is open to everyone, registration free.<br/>
+        Anyone can freely download, upload and delete (their own) packages.<br/><br/>
+
+        Use common sense please. Don't upload non-mod content or packages without the original authors' permission.<br/><br/>
+                    
+        <span class="reloaded-bold">This service is free and open in good faith, abuse might force me to make this service invite-only.</span><br/>
+    </text>
+
+    <h1>I am not a web developer</h1>
+    <text>
+        This website is a 'minimal effort' endeavour.<br/>
+        That is to say, I just made it work for my needs and called it a day.
+    </text>
+</p>

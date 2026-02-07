@@ -1,19 +1,16 @@
 @using BaGetter.Web.Extensions
 @using BaGetter.Web.Helper
 @using Microsoft.AspNetCore.Mvc.TagHelpers
-@using Microsoft.Extensions.Options
 
-@inject IOptions<StatisticsOptions> StatisticsOptions
-@inject ApplicationVersion Version
+@* remove upstream statistics/version injections not used by Reloaded layout *@
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="BaGet">
-    <meta name="author" content="@Version.Authors">
-    @Html.AddReleaseMetaTags()
+    <meta name="description" content="Reloaded Package Server">
+    <meta name="author" content="Loic Sharma, Sewer56">
 
     <link rel="shortcut icon" href="~/_content/BaGetter.Web/favicon.ico">
 
@@ -21,7 +18,7 @@
     <link rel="stylesheet" href="~/_content/BaGetter.Web/lib/office-ui-fabric-core/dist/css/fabric.min.css" />
     <link rel="stylesheet" href="~/_content/BaGetter.Web/css/site.css" />
 
-    <title>@ViewData["Title"] - BaGetter</title>
+    <title>@ViewData["Title"] - Reloaded NuGet</title>
 </head>
 <body>
     <header>
@@ -30,17 +27,11 @@
                 <div class="row">
                     <div id="navbar" class="col-sm-12">
                         <ul class="nav navbar-nav" role="tablist">
+                            <li role="presentation"><a asp-area="" asp-page="/About" role="tab" nav-link><span>About</span></a></li>
                             <li role="presentation"><a asp-area="" asp-page="/Index" role="tab" nav-link><span>Packages</span></a></li>
                             <li role="presentation"><a asp-area="" asp-page="/Upload" role="tab" nav-link><span>Upload</span></a></li>
-                            @if (StatisticsOptions.Value.EnableStatisticsPage)
-                            {
-                                <li role="presentation"><a asp-area="" asp-page="/Statistics" role="tab" nav-link><span>Statistics</span></a></li>
-                            }
-                            <li role="presentation">
-                                <a role="tab" href="https://www.bagetter.com/docs" target="_blank" rel="noopener noreferrer">
-                                    <span>Documentation</span>
-                                </a>
-                            </li>
+                            <li role="presentation"><a role="tab" href="https://github.com/Sewer56/BaGet-ReloadedII" target="_blank" rel="noopener noreferrer"><span>Source Code</span></a></li>
+                            <li role="presentation"><a role="tab" href="https://reloaded-project.github.io/Reloaded-II/" target="_blank" rel="noopener noreferrer"><span>Reloaded Documentation</span></a></li>
                         </ul>
                     </div>
                 </div>
@@ -75,13 +66,6 @@
     <main role="main" class="container main-container">
         @RenderBody()
     </main>
-
-    <footer class="footer">
-        <p>
-            Version: @Version.Version
-        </p>
-        @Html.AddReleaseInformationAsComment()
-    </footer>
 
     <script src="~/_content/BaGetter.Web/lib/alpinejs/dist/alpine.js"></script>
 

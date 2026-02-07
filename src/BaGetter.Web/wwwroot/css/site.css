@@ -86,6 +86,11 @@
 }
 
 
+/* Reloaded Overrides for Bootstrap Defaults */
+.reloaded-bold { font-weight: bold; }
+.reloaded-italic { font-style: italic; }
+.progress { background-color: var(--body-bg-color); }
+
 /* Layout
 -------------------------------------------------- */
 
@@ -278,13 +283,12 @@ h4 {
   font-size: 16px;
 }
 
-.search-options .form-group {
-  margin-right: 10px;
-}
-
-.search-options select,
-.search-options #prerelease {
-  margin-left: 10px;
+.checkbox .cr {
+  position: relative;
+  display: inline-block;
+  border: 1px solid #a9a9a9;
+  width: 1.2em;
+  height: 1.2em;
 }
 
 .search-dropdown {
@@ -589,6 +593,6 @@ h4 {
 /* Upload page
 -------------------------------------------------- */
 code {
-  background-color: var(--code-bg-color);
   color: var(--code-text-color);
+  background-color: var(--code-bg-color);
 }
