@@ -93,19 +93,19 @@
     let tabs = [
         {
             name: ".NET CLI",
-            content: ["dotnet nuget push -s @serviceIndexUrl package.nupkg"],
+            content: ["dotnet nuget push -s @serviceIndexUrl -k <YOUR_API_KEY> package.nupkg"],
             documentation: "https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-nuget-push",
         },
 
         {
             name: "NuGet",
-            content: ["nuget push -Source @serviceIndexUrl package.nupkg"],
+            content: ["nuget push -Source @serviceIndexUrl -ApiKey <YOUR_API_KEY> package.nupkg"],
             documentation: "https://docs.microsoft.com/en-us/nuget/tools/cli-ref-push",
         },
 
         {
             name: "Paket",
-            content: ["paket push --url @baseUrl package.nupkg"],
+            content: ["paket push --url @baseUrl --api-key <YOUR_API_KEY> package.nupkg"],
             documentation: "https://fsprojects.github.io/Paket/paket-push.html",
         },
     ];
