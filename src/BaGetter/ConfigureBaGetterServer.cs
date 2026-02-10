@@ -11,7 +11,6 @@ public class ConfigureBaGetterServer
     : IConfigureOptions<CorsOptions>
     , IConfigureOptions<FormOptions>
     , IConfigureOptions<ForwardedHeadersOptions>
-    , IConfigureOptions<IISServerOptions>
 {
     public const string CorsPolicy = "AllowAll";
     private readonly BaGetterOptions _baGetterOptions;
@@ -47,8 +46,4 @@ public class ConfigureBaGetterServer
         options.KnownProxies.Clear();
     }
 
-    public void Configure(IISServerOptions options)
-    {
-        options.MaxRequestBodySize = (long)_baGetterOptions.MaxPackageSizeGiB * int.MaxValue / 2;
-    }
 }

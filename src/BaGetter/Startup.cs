@@ -33,7 +33,6 @@ public class Startup
         services.ConfigureOptions<ValidateBaGetterOptions>();
         services.ConfigureOptions<ConfigureBaGetterServer>();
 
-        services.AddBaGetterOptions<IISServerOptions>(nameof(IISServerOptions));
         services.AddBaGetterWebApplication(ConfigureBaGetterApplication);
 
         // You can swap between implementations of subsystems like storage and search using BaGetter's configuration.
