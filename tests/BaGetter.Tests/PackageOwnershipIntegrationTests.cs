@@ -24,6 +24,7 @@ public class PackageOwnershipIntegrationTests : IDisposable
         _app = new BaGetterApplication(output, inMemoryConfiguration: dict =>
         {
             dict.Add("AllowPackageOverwrites", "True");
+            dict.Add("PackageDeletionBehavior", "Unlist");
             dict.Add("ApiKey", "master-key");
         });
 
