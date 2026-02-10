@@ -152,7 +152,10 @@ public class DatabaseSearchService : ISearchService
 
         search = search.ToLowerInvariant();
 
-        return query.Where(p => p.Id.ToLower().Contains(search));
+        return query.Where(p =>
+            p.Id.ToLower().Contains(search) ||
+            (p.Title != null && p.Title.ToLower().Contains(search)) ||
+            (p.TagsString != null && p.TagsString.ToLower().Contains(search)));
     }
 
     private static IQueryable<Package> ApplySearchFilters(

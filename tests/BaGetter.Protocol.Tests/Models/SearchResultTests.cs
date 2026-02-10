@@ -348,4 +348,41 @@ public class SearchResultTests
     }
 
     #endregion
+
+    #region ReadmeUrl
+
+    [Fact]
+    public void ReadmeUrl_Present_ShouldDeserialize()
+    {
+        var stringToDeserialize = """
+        {
+            "id": "pkg",
+            "version": "1.0.0",
+            "readmeUrl": "https://example.test/readme",
+            "versions": []
+        }
+        """;
+
+        var result = JsonSerializer.Deserialize<SearchResult>(stringToDeserialize, _serializerOptions);
+
+        Assert.Equal("https://example.test/readme", result.ReadmeUrl);
+    }
+
+    [Fact]
+    public void ReadmeUrl_Missing_ShouldRemainNull()
+    {
+        var stringToDeserialize = """
+        {
+            "id": "pkg",
+            "version": "1.0.0",
+            "versions": []
+        }
+        """;
+
+        var result = JsonSerializer.Deserialize<SearchResult>(stringToDeserialize, _serializerOptions);
+
+        Assert.Null(result.ReadmeUrl);
+    }
+
+    #endregion
 }

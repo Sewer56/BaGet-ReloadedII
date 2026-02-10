@@ -27,6 +27,9 @@ public class SearchResponseBuilder : ISearchResponseBuilder
             var iconUrl = latest.HasEmbeddedIcon
                 ? _url.GetPackageIconDownloadUrl(latest.Id, latest.Version)
                 : latest.IconUrlString;
+            var readmeUrl = latest.HasReadme
+                ? _url.GetPackageReadmeDownloadUrl(latest.Id, latest.Version)
+                : null;
 
             result.Add(new SearchResult
             {
@@ -35,6 +38,7 @@ public class SearchResponseBuilder : ISearchResponseBuilder
                 Description = latest.Description,
                 Authors = latest.Authors,
                 IconUrl = iconUrl,
+                ReadmeUrl = readmeUrl,
                 LicenseUrl = latest.LicenseUrlString,
                 ProjectUrl = latest.ProjectUrlString,
                 RegistrationIndexUrl = _url.GetRegistrationIndexUrl(latest.Id),

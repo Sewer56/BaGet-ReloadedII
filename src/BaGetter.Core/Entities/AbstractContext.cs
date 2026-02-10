@@ -91,10 +91,9 @@ public abstract class AbstractContext<TContext> : DbContext, IContext where TCon
             .HasConversion(UriToStringConverter.Instance)
             .HasMaxLength(DefaultMaxStringLength);
 
-        package.Property(p => p.Tags)
-            .HasMaxLength(DefaultMaxStringLength)
-            .HasConversion(StringArrayToJsonConverter.Instance)
-            .Metadata.SetValueComparer(StringArrayComparer.Instance);
+        package.Property(p => p.TagsString)
+            .HasColumnName("Tags")
+            .HasMaxLength(DefaultMaxStringLength);
 
         package.Property(p => p.Description).HasMaxLength(DefaultMaxStringLength);
         package.Property(p => p.Language).HasMaxLength(MaxPackageLanguageLength);

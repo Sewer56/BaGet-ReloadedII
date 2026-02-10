@@ -43,6 +43,12 @@ public class SearchResult
     public string IconUrl { get; set; }
 
     /// <summary>
+    /// The URL of the matched package's readme.
+    /// </summary>
+    [JsonPropertyName("readmeUrl")]
+    public string ReadmeUrl { get; set; }
+
+    /// <summary>
     /// The URL of the matched package's license.
     /// </summary>
     [JsonPropertyName("licenseUrl")]

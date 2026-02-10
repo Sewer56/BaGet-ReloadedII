@@ -2,8 +2,11 @@ using System;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
+using BaGetter.Core;
 using BaGetter.Protocol;
 using BaGetter.Protocol.Models;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using NuGet.Versioning;
 using Xunit;
 using Xunit.Abstractions;
@@ -33,6 +36,17 @@ public class BaGetClientIntegrationTests : IDisposable
         _client = new NuGetClient(_clientFactory);
 
         _packageStream = TestResources.GetResourceStream(TestResources.Package);
+    }
+
+    private async Task UpdateIndexedPackageMetadataAsync(Action<Package> mutate)
+    {
+        var scopeFactory = _app.Services.GetRequiredService<IServiceScopeFactory>();
+        using var scope = scopeFactory.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<IContext>();
+
+        var package = await context.Packages.SingleAsync(p => p.Id == "TestData");
+        mutate(package);
+        await context.SaveChangesAsync(default);
     }
 
     [Fact]
@@ -71,6 +85,42 @@ public class BaGetClientIntegrationTests : IDisposable
 
         Assert.Equal("1.2.3", version.Version);
         Assert.Equal(0, version.Downloads);
+    }
+
+    [Fact]
+    public async Task SearchByTagReturnsResults()
+    {
+        await _app.AddPackageAsync(_packageStream);
+        await UpdateIndexedPackageMetadataAsync(p => p.Tags = new[] { "client-tag" });
+
+        var results = await _client.SearchAsync("client-tag");
+        var result = Assert.Single(results);
+
+        Assert.Equal("TestData", result.PackageId);
+    }
+
+    [Fact]
+    public async Task SearchByTitleReturnsResults()
+    {
+        await _app.AddPackageAsync(_packageStream);
+        await UpdateIndexedPackageMetadataAsync(p => p.Title = "Client Search Title");
+
+        var results = await _client.SearchAsync("client search");
+        var result = Assert.Single(results);
+
+        Assert.Equal("TestData", result.PackageId);
+    }
+
+    [Fact]
+    public async Task SearchReturnsReadmeUrlWhenPackageHasReadme()
+    {
+        await _app.AddPackageAsync(_packageStream);
+        await UpdateIndexedPackageMetadataAsync(p => p.HasReadme = true);
+
+        var results = await _client.SearchAsync("TestData");
+        var result = Assert.Single(results);
+
+        Assert.Equal("http://localhost/v3/package/testdata/1.2.3/readme", result.ReadmeUrl);
     }
 
     [Fact]

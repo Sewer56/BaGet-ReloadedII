@@ -3,6 +3,9 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using BaGetter.Core;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -26,6 +29,17 @@ public class ApiIntegrationTests : IDisposable
 
         _packageStream = TestResources.GetResourceStream(TestResources.Package);
         _symbolPackageStream = TestResources.GetResourceStream(TestResources.SymbolPackage);
+    }
+
+    private async Task UpdateIndexedPackageMetadataAsync(Action<Package> mutate)
+    {
+        var scopeFactory = _app.Services.GetRequiredService<IServiceScopeFactory>();
+        using var scope = scopeFactory.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<IContext>();
+
+        var package = await context.Packages.SingleAsync(p => p.Id == "TestData");
+        mutate(package);
+        await context.SaveChangesAsync(default);
     }
 
     [Fact]
@@ -98,6 +112,53 @@ public class ApiIntegrationTests : IDisposable
   ""totalHits"": 0,
   ""data"": []
 }", json);
+    }
+
+    [Fact]
+    public async Task SearchByTagReturnsExpectedPackage()
+    {
+        await _app.AddPackageAsync(_packageStream);
+        await UpdateIndexedPackageMetadataAsync(p => p.Tags = new[] { "migration", "search" });
+
+        using var response = await _client.GetAsync("v3/search?q=migration");
+        var content = await response.Content.ReadAsStreamAsync();
+        var json = content.ToPrettifiedJson();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("\"id\": \"TestData\"", json);
+    }
+
+    [Fact]
+    public async Task SearchByTitleReturnsExpectedPackage()
+    {
+        await _app.AddPackageAsync(_packageStream);
+        await UpdateIndexedPackageMetadataAsync(p => p.Title = "Reloaded Search Package");
+
+        using var response = await _client.GetAsync("v3/search?q=reloaded");
+        var content = await response.Content.ReadAsStreamAsync();
+        var json = content.ToPrettifiedJson();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("\"id\": \"TestData\"", json);
+    }
+
+    [Fact]
+    public async Task SearchIncludesReadmeUrlWhenHasReadmeAndNoChangelogField()
+    {
+        await _app.AddPackageAsync(_packageStream);
+        await UpdateIndexedPackageMetadataAsync(p =>
+        {
+            p.HasReadme = true;
+            p.ReleaseNotes = "mapped-from-changelog";
+        });
+
+        using var response = await _client.GetAsync("v3/search?q=TestData");
+        var content = await response.Content.ReadAsStreamAsync();
+        var json = content.ToPrettifiedJson();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("\"readmeUrl\": \"http://localhost/v3/package/testdata/1.2.3/readme\"", json);
+        Assert.DoesNotContain("\"changelog\"", json, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics;
+using Newtonsoft.Json;
 using NuGet.Versioning;
 
 namespace BaGetter.Core;
@@ -62,7 +64,15 @@ public class Package
     public Uri RepositoryUrl { get; set; }
     public string RepositoryType { get; set; }
 
-    public string[] Tags { get; set; }
+    [Column("Tags")]
+    public string TagsString { get; set; }
+
+    [NotMapped]
+    public string[] Tags
+    {
+        get => (!string.IsNullOrEmpty(TagsString)) ? JsonConvert.DeserializeObject<string[]>(TagsString) : Array.Empty<string>();
+        set => TagsString = JsonConvert.SerializeObject(value);
+    }
 
     /// <summary>
     /// Used for optimistic concurrency.
