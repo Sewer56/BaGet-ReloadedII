@@ -17,6 +17,9 @@ public class SearchResponseBuilder : ISearchResponseBuilder
     }
 
     public SearchResponse BuildSearch(IReadOnlyList<PackageRegistration> packageRegistrations)
+        => BuildSearch(packageRegistrations, packageRegistrations.Count);
+
+    public SearchResponse BuildSearch(IReadOnlyList<PackageRegistration> packageRegistrations, long totalHits)
     {
         var result = new List<SearchResult>();
 
@@ -59,17 +62,20 @@ public class SearchResponseBuilder : ISearchResponseBuilder
 
         return new SearchResponse
         {
-            TotalHits = result.Count,
+            TotalHits = totalHits,
             Data = result,
             Context = SearchContext.Default(_url.GetPackageMetadataResourceUrl()),
         };
     }
 
     public AutocompleteResponse BuildAutocomplete(IReadOnlyList<string> data)
+        => BuildAutocomplete(data, data.Count);
+
+    public AutocompleteResponse BuildAutocomplete(IReadOnlyList<string> data, long totalHits)
     {
         return new AutocompleteResponse
         {
-            TotalHits = data.Count,
+            TotalHits = totalHits,
             Data = data,
             Context = AutocompleteContext.Default
         };
