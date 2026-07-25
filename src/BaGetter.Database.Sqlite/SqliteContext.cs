@@ -95,8 +95,16 @@ public class SqliteContext : AbstractContext<SqliteContext>
 
         try
         {
+            // FULL synchronous is the historical BaGet default; keep durability.
             await Database.ExecuteSqlRawAsync("PRAGMA synchronous = '1';", cancellationToken);
             await Database.ExecuteSqlRawAsync("PRAGMA journal_mode = 'WAL';", cancellationToken);
+
+            // Cap how long SQLite waits for a busy (locked) database before failing.
+            // The legacy default let Microsoft.Data.Sqlite hold a command open for its
+            // full 30s CommandTimeout, which under write contention cascaded into
+            // threadpool runaway. 5s is plenty for the (now rare) contention that the
+            // background-batched download counter leaves behind.
+            await Database.ExecuteSqlRawAsync("PRAGMA busy_timeout = 5000;", cancellationToken);
         }
         finally
         {
@@ -110,6 +118,16 @@ public class SqliteContext : AbstractContext<SqliteContext>
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         if (!optionsBuilder.IsConfigured)
-            optionsBuilder.UseSqlite(_bagetterOptions.ConnectionString);
+        {
+            // Drop "Cache=Shared" from connection strings before reaching here (it forces
+            // shared-cache table-level locking, which surfaces write races as the
+            // non-retriable SQLITE_LOCKED instead of the retriable SQLITE_BUSY).
+            optionsBuilder.UseSqlite(_bagetterOptions.ConnectionString, sqlite =>
+            {
+                // Fail fast instead of stalling the worker for the EF default 30s on the
+                // rare lock contention that remains after background-batching the writes.
+                sqlite.CommandTimeout(10);
+            });
+        }
     }
 }
