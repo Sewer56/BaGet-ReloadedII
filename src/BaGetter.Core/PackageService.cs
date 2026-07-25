@@ -13,17 +13,20 @@ public class PackageService : IPackageService
     private readonly IPackageDatabase _db;
     private readonly IUpstreamClient _upstream;
     private readonly IPackageIndexingService _indexer;
+    private readonly IDownloadCounter _downloadCounter;
     private readonly ILogger<PackageService> _logger;
 
     public PackageService(
         IPackageDatabase db,
         IUpstreamClient upstream,
         IPackageIndexingService indexer,
+        IDownloadCounter downloadCounter,
         ILogger<PackageService> logger)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _upstream = upstream ?? throw new ArgumentNullException(nameof(upstream));
         _indexer = indexer ?? throw new ArgumentNullException(nameof(indexer));
+        _downloadCounter = downloadCounter ?? throw new ArgumentNullException(nameof(downloadCounter));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -81,9 +84,15 @@ public class PackageService : IPackageService
         return await MirrorAsync(id, version, cancellationToken);
     }
 
-    public async Task AddDownloadAsync(string packageId, NuGetVersion version, CancellationToken cancellationToken)
+    public Task AddDownloadAsync(string packageId, NuGetVersion version, CancellationToken cancellationToken)
     {
-        await _db.AddDownloadAsync(packageId, version, cancellationToken);
+        // Record the download off the critical path. The increment is coalesced with
+        // others and persisted in batches by the background counter, so serving the
+        // package byte-stream is not blocked by a synchronous database write (and the
+        // SQLite table-lock contention that came with it).
+        _downloadCounter.Enqueue(packageId, version);
+
+        return Task.CompletedTask;
     }
 
     /// <summary>

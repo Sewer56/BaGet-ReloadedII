@@ -17,9 +17,12 @@ public class InMemoryPackageDatabase : IPackageDatabase
         return Task.FromResult(PackageAddResult.Success);
     }
 
-    public Task AddDownloadAsync(string id, NuGetVersion version, CancellationToken cancellationToken)
+    public Task IncrementDownloadsAsync(
+        List<DownloadIncrement> increments,
+        CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        // The in-memory test double does not persist download counts.
+        return Task.CompletedTask;
     }
 
     public async Task<bool> ExistsAsync(string id, CancellationToken cancellationToken)

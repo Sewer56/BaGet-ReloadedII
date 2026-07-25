@@ -76,6 +76,13 @@ public static partial class DependencyInjectionExtensions
 
     private static void AddBaGetServices(this IServiceCollection services)
     {
+        // Background coalescing of package-download increments: a singleton hosted service
+        // that batches count increments off the package-content request path, removing the
+        // per-download synchronous SQLite write that caused table-lock contention.
+        services.AddSingleton<BackgroundDownloadCounter>();
+        services.AddHostedService(sp => sp.GetRequiredService<BackgroundDownloadCounter>());
+        services.TryAddSingleton<IDownloadCounter>(sp => sp.GetRequiredService<BackgroundDownloadCounter>());
+
         services.TryAddSingleton<IFrameworkCompatibilityService, FrameworkCompatibilityService>();
         services.TryAddSingleton<IPackageDownloadsSource, PackageDownloadsJsonSource>();
 

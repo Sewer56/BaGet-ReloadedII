@@ -346,16 +346,16 @@ public class PackageServiceTests
     public class AddDownloadAsync : FactsBase
     {
         [Fact]
-        public async Task AddsDownload()
+        public async Task EnqueuesDownloadOffPath()
         {
             var id = "Hello";
             var version = new NuGetVersion("1.2.3");
 
             await _target.AddDownloadAsync(id, version, _cancellationToken);
 
-            _db.Verify(
-                db => db.AddDownloadAsync(id, version, _cancellationToken),
-                Times.Once);
+            // The increment must be coalesced off the request path rather than
+            // touching the database synchronously.
+            _counter.Verify(c => c.Enqueue(id, version), Times.Once);
         }
     }
 
@@ -364,6 +364,7 @@ public class PackageServiceTests
         protected readonly Mock<IPackageDatabase> _db;
         protected readonly Mock<IUpstreamClient> _upstream;
         protected readonly Mock<IPackageIndexingService> _indexer;
+        protected readonly Mock<IDownloadCounter> _counter;
 
         protected readonly CancellationToken _cancellationToken = CancellationToken.None;
         protected readonly PackageService _target;
@@ -373,11 +374,13 @@ public class PackageServiceTests
             _db = new Mock<IPackageDatabase>();
             _upstream = new Mock<IUpstreamClient>();
             _indexer = new Mock<IPackageIndexingService>();
+            _counter = new Mock<IDownloadCounter>();
 
             _target = new PackageService(
                 _db.Object,
                 _upstream.Object,
                 _indexer.Object,
+                _counter.Object,
                 Mock.Of<ILogger<PackageService>>());
         }
     }

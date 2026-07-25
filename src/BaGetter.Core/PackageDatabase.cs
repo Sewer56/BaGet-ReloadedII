@@ -97,9 +97,36 @@ public class PackageDatabase : IPackageDatabase
         return TryUpdatePackageAsync(id, version, p => p.Listed = true, cancellationToken);
     }
 
-    public async Task AddDownloadAsync(string id, NuGetVersion version, CancellationToken cancellationToken)
+    public async Task IncrementDownloadsAsync(
+        List<DownloadIncrement> increments,
+        CancellationToken cancellationToken)
     {
-        await TryUpdatePackageAsync(id, version, p => p.Downloads += 1, cancellationToken);
+        if (increments is null || increments.Count == 0)
+        {
+            return;
+        }
+
+        // Apply all increments inside a single transaction. Each increment is an atomic,
+        // provider-agnostic `Downloads = Downloads + @delta` UPDATE that does not load
+        // the row into the change tracker, so the write lock is held for the shortest
+        // time possible and many increments collapse into one commit.
+        using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+
+        foreach (var (key, delta) in increments)
+        {
+            if (delta == 0)
+            {
+                continue;
+            }
+
+            await _context.Packages
+                .Where(p => p.Id == key.Id && p.NormalizedVersionString == key.NormalizedVersionString)
+                .ExecuteUpdateAsync(
+                    s => s.SetProperty(p => p.Downloads, p => p.Downloads + delta),
+                    cancellationToken);
+        }
+
+        await transaction.CommitAsync(cancellationToken);
     }
 
     public async Task<bool> HardDeletePackageAsync(string id, NuGetVersion version, CancellationToken cancellationToken)
