@@ -76,9 +76,10 @@ public static partial class DependencyInjectionExtensions
 
     private static void AddBaGetServices(this IServiceCollection services)
     {
-        // In-memory cache for search/autocomplete/registration responses
+        // Bounded per-type caches for search/autocomplete/registration responses
         // (read-heavy, rarely changing).
-        services.AddMemoryCache();
+        services.TryAddSingleton(sp =>
+            new SearchResponseCaches(sp.GetRequiredService<IOptions<SearchOptions>>().Value));
 
         // Background coalescing of package-download increments: a singleton hosted service
         // that batches count increments off the package-content request path, removing the

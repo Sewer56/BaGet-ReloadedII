@@ -32,4 +32,20 @@ public class SearchOptions
     /// Time-to-live, in seconds, for cached dependent-package lists.
     /// </summary>
     public int DependentsCacheSeconds { get; set; } = 60;
+
+    // Per-type cache entry limits. Sizes estimated from real production feed data
+    // (avg 6.2 versions/package, ~80-char descriptions, take=20 pages); defaults
+    // total ~160 MiB. Set a limit to 0 to disable caching for that type.
+
+    /// <summary>Max cached search responses: 2048 × ~64 KiB ≈ 128 MiB.</summary>
+    public int SearchCacheMaxEntries { get; set; } = 2048;
+
+    /// <summary>Max cached autocomplete responses: 4096 × ~4 KiB ≈ 16 MiB.</summary>
+    public int AutocompleteCacheMaxEntries { get; set; } = 4096;
+
+    /// <summary>Max cached package-version lists: 4096 × ~2 KiB ≈ 8 MiB.</summary>
+    public int VersionsCacheMaxEntries { get; set; } = 4096;
+
+    /// <summary>Max cached dependent-package lists: 1024 × ~8 KiB ≈ 8 MiB.</summary>
+    public int DependentsCacheMaxEntries { get; set; } = 1024;
 }

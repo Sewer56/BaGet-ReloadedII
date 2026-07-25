@@ -16,7 +16,7 @@ public class DatabaseSearchService : ISearchService
     private readonly IContext _context;
     private readonly IFrameworkCompatibilityService _frameworks;
     private readonly ISearchResponseBuilder _searchBuilder;
-    private readonly IMemoryCache _cache;
+    private readonly SearchResponseCaches _caches;
     private readonly SearchOptions _searchOptions;
     private readonly ILogger<DatabaseSearchService> _logger;
 
@@ -24,7 +24,7 @@ public class DatabaseSearchService : ISearchService
         IContext context,
         IFrameworkCompatibilityService frameworks,
         ISearchResponseBuilder searchBuilder,
-        IMemoryCache cache = null,
+        SearchResponseCaches caches = null,
         IOptions<SearchOptions> searchOptions = null,
         ILogger<DatabaseSearchService> logger = null)
     {
@@ -35,24 +35,24 @@ public class DatabaseSearchService : ISearchService
         _context = context;
         _frameworks = frameworks;
         _searchBuilder = searchBuilder;
-        _cache = cache;
+        _caches = caches;
         _searchOptions = searchOptions?.Value ?? new SearchOptions();
         _logger = logger;
     }
 
-    private bool CachingEnabled => _cache is not null && _searchOptions.EnableCache;
+    private bool CachingEnabled => _caches is not null && _searchOptions.EnableCache;
 
     private static TimeSpan Ttl(int seconds, int fallbackSeconds) =>
         TimeSpan.FromSeconds(seconds > 0 ? seconds : fallbackSeconds);
 
-    private async Task<T> GetOrCacheAsync<T>(string cacheKey, TimeSpan ttl, Func<CancellationToken, Task<T>> factory, CancellationToken cancellationToken)
+    private async Task<T> GetOrCacheAsync<T>(IMemoryCache cache, string cacheKey, TimeSpan ttl, Func<CancellationToken, Task<T>> factory, CancellationToken cancellationToken)
     {
-        if (!CachingEnabled)
+        if (!CachingEnabled || cache is null)
         {
             return await factory(cancellationToken);
         }
 
-        if (_cache.TryGetValue(cacheKey, out T cached))
+        if (cache.TryGetValue(cacheKey, out T cached))
         {
             return cached;
         }
@@ -61,12 +61,14 @@ public class DatabaseSearchService : ISearchService
 
         // PostEvictionCallbacks not needed; a short absolute TTL is sufficient for the
         // eventually-consistent download counts (which are now persisted off-path).
+        // Size = 1: each cache is count-bounded via its SizeLimit (see SearchResponseCaches).
         var options = new MemoryCacheEntryOptions
         {
             AbsoluteExpirationRelativeToNow = ttl,
+            Size = 1,
         };
 
-        _cache.Set(cacheKey, value, options);
+        cache.Set(cacheKey, value, options);
         return value;
     }
 
@@ -76,7 +78,7 @@ public class DatabaseSearchService : ISearchService
         // filtering entirely, while "" resolves to a concrete (non-null) compatible list.
         var cacheKey = $"search|q={request.Query}|skip={request.Skip}|take={request.Take}|pre={request.IncludePrerelease}|sem2={request.IncludeSemVer2}|type={request.PackageType}|fx={request.Framework ?? "<null>"}";
 
-        return GetOrCacheAsync(cacheKey, Ttl(_searchOptions.SearchCacheSeconds, 120), async _ =>
+        return GetOrCacheAsync(_caches?.Search, cacheKey, Ttl(_searchOptions.SearchCacheSeconds, 120), async _ =>
         {
         var frameworks = GetCompatibleFrameworksOrNull(request.Framework);
 
@@ -134,7 +136,7 @@ public class DatabaseSearchService : ISearchService
     {
         var cacheKey = $"ac|q={request.Query}|skip={request.Skip}|take={request.Take}|pre={request.IncludePrerelease}|sem2={request.IncludeSemVer2}|type={request.PackageType}";
 
-        return GetOrCacheAsync(cacheKey, Ttl(_searchOptions.AutocompleteCacheSeconds, 120), async _ =>
+        return GetOrCacheAsync(_caches?.Autocomplete, cacheKey, Ttl(_searchOptions.AutocompleteCacheSeconds, 120), async _ =>
         {
         IQueryable<Package> search = _context.Packages;
 
@@ -162,7 +164,7 @@ public class DatabaseSearchService : ISearchService
     {
         var cacheKey = $"vers|id={request.PackageId}|pre={request.IncludePrerelease}|sem2={request.IncludeSemVer2}";
 
-        return GetOrCacheAsync(cacheKey, Ttl(_searchOptions.VersionsCacheSeconds, 60), async _ =>
+        return GetOrCacheAsync(_caches?.Versions, cacheKey, Ttl(_searchOptions.VersionsCacheSeconds, 60), async _ =>
         {
         var packageId = request.PackageId.ToLower();
         var search = _context
@@ -188,7 +190,7 @@ public class DatabaseSearchService : ISearchService
     {
         var cacheKey = $"deps|id={packageId}";
 
-        return GetOrCacheAsync(cacheKey, Ttl(_searchOptions.DependentsCacheSeconds, 60), async _ =>
+        return GetOrCacheAsync(_caches?.Dependents, cacheKey, Ttl(_searchOptions.DependentsCacheSeconds, 60), async _ =>
         {
         var dependents = await _context
             .Packages
