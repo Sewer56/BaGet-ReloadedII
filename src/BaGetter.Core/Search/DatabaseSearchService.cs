@@ -72,7 +72,9 @@ public class DatabaseSearchService : ISearchService
 
     public Task<SearchResponse> SearchAsync(SearchRequest request, CancellationToken cancellationToken)
     {
-        var cacheKey = $"search|q={request.Query}|skip={request.Skip}|take={request.Take}|pre={request.IncludePrerelease}|sem2={request.IncludeSemVer2}|type={request.PackageType}|fx={request.Framework}";
+        // Encode a null framework distinctly from an empty string: null skips framework
+        // filtering entirely, while "" resolves to a concrete (non-null) compatible list.
+        var cacheKey = $"search|q={request.Query}|skip={request.Skip}|take={request.Take}|pre={request.IncludePrerelease}|sem2={request.IncludeSemVer2}|type={request.PackageType}|fx={request.Framework ?? "<null>"}";
 
         return GetOrCacheAsync(cacheKey, Ttl(_searchOptions.SearchCacheSeconds, 120), async _ =>
         {
