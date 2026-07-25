@@ -59,12 +59,19 @@ namespace BaGetter.Azure
             // increment through the existing optimistic-concurrency path.
             foreach (var (key, delta) in increments)
             {
+                if (!NuGetVersion.TryParse(key.NormalizedVersionString, out var version))
+                {
+                    _logger.LogWarning(
+                        "Dropped download increment of {Delta} for package '{PackageId}' version '{NormalizedVersionString}': the version string could not be parsed.",
+                        delta,
+                        key.Id,
+                        key.NormalizedVersionString);
+                    continue;
+                }
+
                 for (var i = 0; i < delta; i++)
                 {
-                    if (NuGetVersion.TryParse(key.NormalizedVersionString, out var version))
-                    {
-                        await IncrementOneAsync(key.Id, version, cancellationToken);
-                    }
+                    await IncrementOneAsync(key.Id, version, cancellationToken);
                 }
             }
         }

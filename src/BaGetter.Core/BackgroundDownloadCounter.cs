@@ -163,6 +163,9 @@ public class BackgroundDownloadCounter : BackgroundService, IDownloadCounter
         {
             if (_pending.Count >= MaxPending)
             {
+                _logger.LogWarning(
+                    "Download-count buffer saturated ({Count} entries); dropping remaining re-queued increments.",
+                    _pending.Count);
                 break;
             }
 
