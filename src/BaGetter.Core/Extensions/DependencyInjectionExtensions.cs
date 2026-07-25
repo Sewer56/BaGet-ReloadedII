@@ -76,6 +76,10 @@ public static partial class DependencyInjectionExtensions
 
     private static void AddBaGetServices(this IServiceCollection services)
     {
+        // In-memory cache for search/autocomplete/registration responses
+        // (read-heavy, rarely changing).
+        services.AddMemoryCache();
+
         // Background coalescing of package-download increments: a singleton hosted service
         // that batches count increments off the package-content request path, removing the
         // per-download synchronous SQLite write that caused table-lock contention.
