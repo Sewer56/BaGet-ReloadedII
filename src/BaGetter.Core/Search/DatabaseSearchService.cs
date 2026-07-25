@@ -5,6 +5,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using BaGetter.Protocol.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace BaGetter.Core;
 
@@ -13,8 +16,17 @@ public class DatabaseSearchService : ISearchService
     private readonly IContext _context;
     private readonly IFrameworkCompatibilityService _frameworks;
     private readonly ISearchResponseBuilder _searchBuilder;
+    private readonly SearchResponseCaches _caches;
+    private readonly SearchOptions _searchOptions;
+    private readonly ILogger<DatabaseSearchService> _logger;
 
-    public DatabaseSearchService(IContext context, IFrameworkCompatibilityService frameworks, ISearchResponseBuilder searchBuilder)
+    public DatabaseSearchService(
+        IContext context,
+        IFrameworkCompatibilityService frameworks,
+        ISearchResponseBuilder searchBuilder,
+        SearchResponseCaches caches = null,
+        IOptions<SearchOptions> searchOptions = null,
+        ILogger<DatabaseSearchService> logger = null)
     {
         ArgumentNullException.ThrowIfNull(context);
         ArgumentNullException.ThrowIfNull(frameworks);
@@ -23,10 +35,51 @@ public class DatabaseSearchService : ISearchService
         _context = context;
         _frameworks = frameworks;
         _searchBuilder = searchBuilder;
+        _caches = caches;
+        _searchOptions = searchOptions?.Value ?? new SearchOptions();
+        _logger = logger;
     }
 
-    public async Task<SearchResponse> SearchAsync(SearchRequest request, CancellationToken cancellationToken)
+    private bool CachingEnabled => _caches is not null && _searchOptions.EnableCache;
+
+    private static TimeSpan Ttl(int seconds, int fallbackSeconds) =>
+        TimeSpan.FromSeconds(seconds > 0 ? seconds : fallbackSeconds);
+
+    private async Task<T> GetOrCacheAsync<T>(IMemoryCache cache, string cacheKey, TimeSpan ttl, Func<CancellationToken, Task<T>> factory, CancellationToken cancellationToken)
     {
+        if (!CachingEnabled || cache is null)
+        {
+            return await factory(cancellationToken);
+        }
+
+        if (cache.TryGetValue(cacheKey, out T cached))
+        {
+            return cached;
+        }
+
+        var value = await factory(cancellationToken);
+
+        // PostEvictionCallbacks not needed; a short absolute TTL is sufficient for the
+        // eventually-consistent download counts (which are now persisted off-path).
+        // Size = 1: each cache is count-bounded via its SizeLimit (see SearchResponseCaches).
+        var options = new MemoryCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = ttl,
+            Size = 1,
+        };
+
+        cache.Set(cacheKey, value, options);
+        return value;
+    }
+
+    public Task<SearchResponse> SearchAsync(SearchRequest request, CancellationToken cancellationToken)
+    {
+        // Encode a null framework distinctly from an empty string: null skips framework
+        // filtering entirely, while "" resolves to a concrete (non-null) compatible list.
+        var cacheKey = $"search|q={request.Query}|skip={request.Skip}|take={request.Take}|pre={request.IncludePrerelease}|sem2={request.IncludeSemVer2}|type={request.PackageType}|fx={request.Framework ?? "<null>"}";
+
+        return GetOrCacheAsync(_caches?.Search, cacheKey, Ttl(_searchOptions.SearchCacheSeconds, 120), async _ =>
+        {
         var frameworks = GetCompatibleFrameworksOrNull(request.Framework);
 
         IQueryable<Package> search = _context.Packages;
@@ -76,10 +129,15 @@ public class DatabaseSearchService : ISearchService
             .ToList();
 
         return _searchBuilder.BuildSearch(groupedResults);
+        }, cancellationToken);
     }
 
-    public async Task<AutocompleteResponse> AutocompleteAsync(AutocompleteRequest request, CancellationToken cancellationToken)
+    public Task<AutocompleteResponse> AutocompleteAsync(AutocompleteRequest request, CancellationToken cancellationToken)
     {
+        var cacheKey = $"ac|q={request.Query}|skip={request.Skip}|take={request.Take}|pre={request.IncludePrerelease}|sem2={request.IncludeSemVer2}|type={request.PackageType}";
+
+        return GetOrCacheAsync(_caches?.Autocomplete, cacheKey, Ttl(_searchOptions.AutocompleteCacheSeconds, 120), async _ =>
+        {
         IQueryable<Package> search = _context.Packages;
 
         search = ApplySearchQuery(search, request.Query);
@@ -99,10 +157,15 @@ public class DatabaseSearchService : ISearchService
             .ToListAsync(cancellationToken);
 
         return _searchBuilder.BuildAutocomplete(packageIds);
+        }, cancellationToken);
     }
 
-    public async Task<AutocompleteResponse> ListPackageVersionsAsync(VersionsRequest request, CancellationToken cancellationToken)
+    public Task<AutocompleteResponse> ListPackageVersionsAsync(VersionsRequest request, CancellationToken cancellationToken)
     {
+        var cacheKey = $"vers|id={request.PackageId}|pre={request.IncludePrerelease}|sem2={request.IncludeSemVer2}";
+
+        return GetOrCacheAsync(_caches?.Versions, cacheKey, Ttl(_searchOptions.VersionsCacheSeconds, 60), async _ =>
+        {
         var packageId = request.PackageId.ToLower();
         var search = _context
             .Packages
@@ -120,10 +183,15 @@ public class DatabaseSearchService : ISearchService
             .ToListAsync(cancellationToken);
 
         return _searchBuilder.BuildAutocomplete(packageVersions);
+        }, cancellationToken);
     }
 
-    public async Task<DependentsResponse> FindDependentsAsync(string packageId, CancellationToken cancellationToken)
+    public Task<DependentsResponse> FindDependentsAsync(string packageId, CancellationToken cancellationToken)
     {
+        var cacheKey = $"deps|id={packageId}";
+
+        return GetOrCacheAsync(_caches?.Dependents, cacheKey, Ttl(_searchOptions.DependentsCacheSeconds, 60), async _ =>
+        {
         var dependents = await _context
             .Packages
             .Where(p => p.Listed)
@@ -140,6 +208,7 @@ public class DatabaseSearchService : ISearchService
             .ToListAsync(cancellationToken);
 
         return _searchBuilder.BuildDependents(dependents);
+        }, cancellationToken);
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1862:Use the 'StringComparison' method overloads to perform case-insensitive string comparisons", Justification = "Not for EF queries")]
@@ -157,6 +226,7 @@ public class DatabaseSearchService : ISearchService
             (p.Title != null && p.Title.ToLower().Contains(search)) ||
             (p.TagsString != null && p.TagsString.ToLower().Contains(search)));
     }
+
 
     private static IQueryable<Package> ApplySearchFilters(
         IQueryable<Package> query,

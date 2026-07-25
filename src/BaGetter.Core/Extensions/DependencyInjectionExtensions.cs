@@ -76,6 +76,11 @@ public static partial class DependencyInjectionExtensions
 
     private static void AddBaGetServices(this IServiceCollection services)
     {
+        // Bounded per-type caches for search/autocomplete/registration responses
+        // (read-heavy, rarely changing).
+        services.TryAddSingleton(sp =>
+            new SearchResponseCaches(sp.GetRequiredService<IOptions<SearchOptions>>().Value));
+
         // Background coalescing of package-download increments: a singleton hosted service
         // that batches count increments off the package-content request path, removing the
         // per-download synchronous SQLite write that caused table-lock contention.
