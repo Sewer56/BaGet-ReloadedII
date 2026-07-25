@@ -159,21 +159,6 @@ public class PackageDatabaseTests
         }
     }
 
-    public class AddDownloadAsync : FactsBase
-    {
-        [Fact]
-        public async Task ReturnsFalseIfPackageDoesNotExist()
-        {
-            await Task.Yield();
-        }
-
-        [Fact]
-        public async Task IncrementsPackageDownloads()
-        {
-            await Task.Yield();
-        }
-    }
-
     public class HardDeletePackageAsync : FactsBase
     {
         [Fact]

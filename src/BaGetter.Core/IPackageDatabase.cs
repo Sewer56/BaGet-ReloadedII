@@ -78,13 +78,15 @@ public interface IPackageDatabase
     Task<bool> RelistPackageAsync(string id, NuGetVersion version, CancellationToken cancellationToken);
 
     /// <summary>
-    /// Increment a package's download count.
+    /// Apply a batch of download-count increments atomically. Each entry pairs a
+    /// (package id, normalized version) with the number of new downloads to add.
+    /// Used to persist coalesced increments off the request hot path.
     /// </summary>
-    /// <param name="id">The id of the package to update.</param>
-    /// <param name="version">The id of the package to update.</param>
+    /// <param name="increments">The increments to apply, keyed by package id and normalized version.</param>
     /// <param name="cancellationToken">A token to cancel the task.</param>
-    /// <returns>Task that completes when the package's download has been incremented.</returns>
-    Task AddDownloadAsync(string id, NuGetVersion version, CancellationToken cancellationToken);
+    Task IncrementDownloadsAsync(
+        List<DownloadIncrement> increments,
+        CancellationToken cancellationToken);
 
     /// <summary>
     /// Completely remove the package from the database.

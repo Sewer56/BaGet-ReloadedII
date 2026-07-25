@@ -51,50 +51,27 @@ namespace BaGetter.Azure
             return PackageAddResult.Success;
         }
 
-        public async Task AddDownloadAsync(
-            string id,
-            NuGetVersion version,
+        public async Task IncrementDownloadsAsync(
+            List<DownloadIncrement> increments,
             CancellationToken cancellationToken)
         {
-            var attempt = 0;
-
-            while (true)
+            // Azure Table Storage has no single-statement batched increment; replay each
+            // increment through the existing optimistic-concurrency path.
+            foreach (var (key, delta) in increments)
             {
-                try
+                if (!NuGetVersion.TryParse(key.NormalizedVersionString, out var version))
                 {
-                    var result = await _table.GetEntityIfExistsAsync<PackageDownloadsEntity>(id, version.ToNormalizedString().ToLowerInvariant(), cancellationToken: cancellationToken);
-
-                    if (!result.HasValue)
-                    {
-                        return;
-                    }
-
-                    var entity = result.Value;
-
-                    entity.Downloads += 1;
-
-                    var updateResponse = await _table.UpdateEntityAsync(entity, entity.ETag, TableUpdateMode.Merge, cancellationToken);
-
-                    // Not sure if there's gonna be an exception here so check both ways just in case
-                    if(updateResponse.Status == (int?)HttpStatusCode.PreconditionFailed && attempt < MaxPreconditionFailures)
-                    {
-                        attempt++;
-                        _logger.LogWarning(
-                            "Retrying due to precondition failure, attempt {Attempt} of {MaxPreconditionFailures}",
-                            attempt, MaxPreconditionFailures);
-                        continue;
-                    }
-
-                    return;
-                }
-                catch (RequestFailedException e)
-                    when (attempt < MaxPreconditionFailures && e.IsPreconditionFailedException())
-                {
-                    attempt++;
                     _logger.LogWarning(
-                        e,
-                        "Retrying due to precondition failure, attempt {Attempt} of {MaxPreconditionFailures}",
-                        attempt, MaxPreconditionFailures);
+                        "Dropped download increment of {Delta} for package '{PackageId}' version '{NormalizedVersionString}': the version string could not be parsed.",
+                        delta,
+                        key.Id,
+                        key.NormalizedVersionString);
+                    continue;
+                }
+
+                for (var i = 0; i < delta; i++)
+                {
+                    await IncrementOneAsync(key.Id, version, cancellationToken);
                 }
             }
         }
@@ -114,7 +91,6 @@ namespace BaGetter.Azure
 
             return false;
         }
-
         public async Task<bool> ExistsAsync(
             string id,
             NuGetVersion version,
@@ -216,6 +192,62 @@ namespace BaGetter.Azure
             await _table.UpdateEntityAsync(entity, ETag.All, TableUpdateMode.Merge, cancellationToken);
 
             return true;
+        }
+
+        /// <summary>
+        /// Increment a single package's download count using optimistic concurrency.
+        /// Retries up to <see cref="MaxPreconditionFailures"/> times when the entity's
+        /// <see cref="ETag"/> has changed between the read and the merge update.
+        /// </summary>
+        /// <param name="id">The package id (table partition key).</param>
+        /// <param name="version">The package version to increment.</param>
+        /// <param name="cancellationToken">A token to cancel the operation.</param>
+        private async Task IncrementOneAsync(
+            string id,
+            NuGetVersion version,
+            CancellationToken cancellationToken)
+        {
+            var attempt = 0;
+
+            while (true)
+            {
+                try
+                {
+                    var result = await _table.GetEntityIfExistsAsync<PackageDownloadsEntity>(id, version.ToNormalizedString().ToLowerInvariant(), cancellationToken: cancellationToken);
+
+                    if (!result.HasValue)
+                    {
+                        return;
+                    }
+
+                    var entity = result.Value;
+
+                    entity.Downloads += 1;
+
+                    var updateResponse = await _table.UpdateEntityAsync(entity, entity.ETag, TableUpdateMode.Merge, cancellationToken);
+
+                    // Not sure if there's gonna be an exception here so check both ways just in case
+                    if(updateResponse.Status == (int?)HttpStatusCode.PreconditionFailed && attempt < MaxPreconditionFailures)
+                    {
+                        attempt++;
+                        _logger.LogWarning(
+                            "Retrying due to precondition failure, attempt {Attempt} of {MaxPreconditionFailures}",
+                            attempt, MaxPreconditionFailures);
+                        continue;
+                    }
+
+                    return;
+                }
+                catch (RequestFailedException e)
+                    when (attempt < MaxPreconditionFailures && e.IsPreconditionFailedException())
+                {
+                    attempt++;
+                    _logger.LogWarning(
+                        e,
+                        "Retrying due to precondition failure, attempt {Attempt} of {MaxPreconditionFailures}",
+                        attempt, MaxPreconditionFailures);
+                }
+            }
         }
 
         private static List<string> MinimalColumnSet => ["PartitionKey"];
