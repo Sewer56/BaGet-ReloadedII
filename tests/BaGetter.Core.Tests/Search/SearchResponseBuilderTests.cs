@@ -149,4 +149,36 @@ public class SearchResponseBuilderTests
         // Assert
         Assert.Equal(data.Count, result.TotalHits);
     }
+
+    [Fact]
+    public void BuildSearch_WithTotalHits_ReturnsProvidedTotal()
+    {
+        // Arrange: a single registration on the page, but a true total that exceeds it.
+        var data = new List<PackageRegistration> { GetPackageRegistration() };
+        const long trueTotal = 903;
+        var searchResponseBuilder = new SearchResponseBuilder(_urlGenerator.Object);
+
+        // Act
+        var result = searchResponseBuilder.BuildSearch(data, trueTotal);
+
+        // Assert: TotalHits must reflect the true total, not the page size.
+        Assert.Equal(trueTotal, result.TotalHits);
+        Assert.Single(result.Data);
+    }
+
+    [Fact]
+    public void BuildAutocomplete_WithTotalHits_ReturnsProvidedTotal()
+    {
+        // Arrange: a single id on the page, but a true total that exceeds it.
+        var data = new List<string> { "dummy" };
+        const long trueTotal = 903;
+        var searchResponseBuilder = new SearchResponseBuilder(_urlGenerator.Object);
+
+        // Act
+        var result = searchResponseBuilder.BuildAutocomplete(data, trueTotal);
+
+        // Assert
+        Assert.Equal(trueTotal, result.TotalHits);
+        Assert.Single(result.Data);
+    }
 }

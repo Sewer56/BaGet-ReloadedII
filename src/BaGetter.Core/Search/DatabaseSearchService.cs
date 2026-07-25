@@ -74,6 +74,7 @@ public class DatabaseSearchService : ISearchService
 
     public Task<SearchResponse> SearchAsync(SearchRequest request, CancellationToken cancellationToken)
     {
+        request = NormalizePaging(request);
         // Encode a null framework distinctly from an empty string: null skips framework
         // filtering entirely, while "" resolves to a concrete (non-null) compatible list.
         var cacheKey = $"search|q={request.Query}|skip={request.Skip}|take={request.Take}|pre={request.IncludePrerelease}|sem2={request.IncludeSemVer2}|type={request.PackageType}|fx={request.Framework ?? "<null>"}";
@@ -90,6 +91,16 @@ public class DatabaseSearchService : ISearchService
             request.IncludeSemVer2,
             request.PackageType,
             frameworks);
+
+        // True total match count (distinct package IDs), ignoring Skip/Take.
+        // Without this, TotalHits would equal the page size and clients could not
+        // distinguish "more results" from "last page" — see nuget.org parity note
+        // in the NormalizePaging remarks: clients stop on a short/empty page, but
+        // some return totalHits for display, so it must reflect the real total.
+        var totalHits = await search
+            .Select(p => p.Id)
+            .Distinct()
+            .CountAsync(cancellationToken);
 
         var packageIds = search
             .Select(p => p.Id)
@@ -128,12 +139,13 @@ public class DatabaseSearchService : ISearchService
             .Select(group => new PackageRegistration(group.Key, group.ToList()))
             .ToList();
 
-        return _searchBuilder.BuildSearch(groupedResults);
+        return _searchBuilder.BuildSearch(groupedResults, totalHits);
         }, cancellationToken);
     }
 
     public Task<AutocompleteResponse> AutocompleteAsync(AutocompleteRequest request, CancellationToken cancellationToken)
     {
+        request = NormalizePaging(request);
         var cacheKey = $"ac|q={request.Query}|skip={request.Skip}|take={request.Take}|pre={request.IncludePrerelease}|sem2={request.IncludeSemVer2}|type={request.PackageType}";
 
         return GetOrCacheAsync(_caches?.Autocomplete, cacheKey, Ttl(_searchOptions.AutocompleteCacheSeconds, 120), async _ =>
@@ -148,6 +160,13 @@ public class DatabaseSearchService : ISearchService
             request.PackageType,
             frameworks: null);
 
+        // True total match count (distinct package IDs), ignoring Skip/Take.
+        // See SearchAsync for rationale.
+        var totalHits = await search
+            .Select(p => p.Id)
+            .Distinct()
+            .CountAsync(cancellationToken);
+
         var packageIds = await search
             .OrderByDescending(p => p.Downloads)
             .Select(p => p.Id)
@@ -156,7 +175,7 @@ public class DatabaseSearchService : ISearchService
             .Take(request.Take)
             .ToListAsync(cancellationToken);
 
-        return _searchBuilder.BuildAutocomplete(packageIds);
+        return _searchBuilder.BuildAutocomplete(packageIds, totalHits);
         }, cancellationToken);
     }
 
@@ -225,6 +244,64 @@ public class DatabaseSearchService : ISearchService
             p.Id.ToLower().Contains(search) ||
             (p.Title != null && p.Title.ToLower().Contains(search)) ||
             (p.TagsString != null && p.TagsString.ToLower().Contains(search)));
+    }
+
+    /// <summary>
+    /// Clamp the page size so a single request cannot force an unbounded query or cache
+    /// an enormous response. <c>Skip</c> is left unbounded so clients that paginate to
+    /// exhaustion (e.g. <c>skip += take</c> until an empty page) can reach every result.
+    /// </summary>
+    /// <remarks>
+    /// The cap is set to 1000 to fit downstream consumers that page in steps of 1000
+    /// (e.g. Reloaded-II's <c>NuGetPackageProvider</c> uses <c>take=1000</c>). A higher
+    /// cap would still loop correctly because the client stops on a short/empty page;
+    /// a lower cap would silently truncate and (for clients that enable "next page" only
+    /// when <c>count &gt;= take</c>) break pagination entirely.
+    /// </remarks>
+    private const int MaxSearchTake = 1000;
+    private const int DefaultSearchTake = 20;
+
+    private static SearchRequest NormalizePaging(SearchRequest request)
+    {
+        var take = request.Take <= 0 ? DefaultSearchTake : Math.Min(request.Take, MaxSearchTake);
+        var skip = Math.Max(request.Skip, 0);
+
+        if (take == request.Take && skip == request.Skip)
+        {
+            return request;
+        }
+
+        return new SearchRequest
+        {
+            Query = request.Query,
+            Skip = skip,
+            Take = take,
+            IncludePrerelease = request.IncludePrerelease,
+            IncludeSemVer2 = request.IncludeSemVer2,
+            PackageType = request.PackageType,
+            Framework = request.Framework,
+        };
+    }
+
+    private static AutocompleteRequest NormalizePaging(AutocompleteRequest request)
+    {
+        var take = request.Take <= 0 ? DefaultSearchTake : Math.Min(request.Take, MaxSearchTake);
+        var skip = Math.Max(request.Skip, 0);
+
+        if (take == request.Take && skip == request.Skip)
+        {
+            return request;
+        }
+
+        return new AutocompleteRequest
+        {
+            Query = request.Query,
+            Skip = skip,
+            Take = take,
+            IncludePrerelease = request.IncludePrerelease,
+            IncludeSemVer2 = request.IncludeSemVer2,
+            PackageType = request.PackageType,
+        };
     }
 
 
