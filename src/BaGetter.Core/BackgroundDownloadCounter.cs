@@ -19,7 +19,7 @@ public class BackgroundDownloadCounter : BackgroundService, IDownloadCounter
     // Baked-in production values: flushing on a fixed interval gives predictable
     // staleness under bursty traffic, and the pending cap bounds memory if the
     // database is unavailable.
-    private static readonly TimeSpan FlushInterval = TimeSpan.FromSeconds(5);
+    private static readonly TimeSpan FlushInterval = TimeSpan.FromSeconds(60);
     private const int MaxPending = 50000;
 
     private readonly IServiceScopeFactory _scopeFactory;
